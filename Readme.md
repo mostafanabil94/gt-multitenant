@@ -6,13 +6,13 @@ To install project locally please follow the instruction on [Installation Guide]
 
 ## Installation Guide
 
-0- You need to have NPM and TypeScript pre-installed globally on your machine.
-1- Clone the git repository repository to ur machine in the desired location.
-2- Run npm install
-3- Change the DB credentials in the .env file to the desired testing DB (local or hosted)
-4- Run npm run dbseed
-5- Run npm run build
-6- Run npm run start
+0- You need to have NPM and TypeScript pre-installed globally on your machine.<br>
+1- Clone the git repository repository to ur machine in the desired location.<br>
+2- Run npm install<br>
+3- Change the DB credentials in the .env file to the desired testing DB (local or hosted)<br>
+4- Run npm run dbseed<br>
+5- Run npm run build<br>
+6- Run npm run start<br>
 
 ## Contents
 
