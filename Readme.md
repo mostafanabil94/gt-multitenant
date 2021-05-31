@@ -24,8 +24,6 @@ If you are looking for something specific, you can jump right into the relevant 
 
 1. [Common Libraries](#common-libraries)
 
-1. [Architecture](#architecture)
-
 1. [Coding Style](#coding-style)
 
 1. [Deployment](#deployment)
@@ -63,34 +61,34 @@ We are using [NPM][npm] as our main dependency management.
 
 Our project structure:
 
-|-- Commands
-|-- Dist
-|-- Plugins
-|-- Src
-|   |-- Api
-|   |   |-- Controllers (Has the API logic itself that uses the Services and the models) 
-|   |   |-- Errors
-|   |   |-- Interceptors
-|   |   |-- Middlewares
-|   |   |-- Models
-|   |   |-- Repositories (Interfacing the DB tables) 
-|   |   |-- Services (Holds the basic and custom Crud and other operations implementation for each model) 
-|   |-- Auth
-|   |-- Database
-|   |   |-- Factories
-|   |   |-- Migrations (Database migration files that generate DB tables)
-|   |   |-- Seeds (Data Seeding files) 
-|   |-- Decorators
-|   |-- Lib
-|   |-- Loaders
-|   |-- Plugin-Manager
-|   |-- Public
-|   |-- Report
-|-- Types
-|-- Test
-|-- Uploads
-|-- Views
-|-- Assets
+├─ Commands<br>
+├─ Dist<br>
+├─ Plugins<br>
+├─ Src<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Api<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Controllers (Has the API logic itself that uses the Services and the models) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Errors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Interceptors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Middlewares<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Models<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Repositories (Interfacing the DB tables)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Services (Holds the basic and custom Crud and other operations implementation for each model)<br> 
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Auth<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Database<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Factories<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Migrations (Database migration files that generate DB tables)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├─ Seeds (Data Seeding files) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Decorators<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Lib<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Loaders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Plugin-Manager<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Public<br>
+&nbsp;&nbsp;&nbsp;&nbsp;├─ Report<br>
+├─ Types<br>
+├─ Test<br>
+├─ Uploads<br>
+├─ Views<br>
+├─ Assets<br>
 
 ### Minimum NPM Version Requirement
 
