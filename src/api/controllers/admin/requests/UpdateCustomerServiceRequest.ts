@@ -4,6 +4,10 @@ export class UpdateCustomerService {
   @IsNotEmpty()
   public username: string;
 
+  public firstName: string;
+
+  public lastName: string;
+
   @IsEmail()
   public email: string;
 

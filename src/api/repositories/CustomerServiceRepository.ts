@@ -8,7 +8,7 @@ export class CustomerServiceRepository extends Repository<CustomerService> {
       CustomerService,
       "customerService"
     );
-    query.select(["COUNT(customerService.id) as customerServiceCount"]);
+    query.select(["COUNT(customerService.customerServiceId) as customerServiceCount"]);
     query.where("DATE(customerService.createdDate) = :todaydate", {
       todaydate,
     });

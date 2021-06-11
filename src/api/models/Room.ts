@@ -20,7 +20,7 @@ export class Room extends BaseModel {
   public branchId: number;
 
   @Column({ name: "name" })
-  public room: string;
+  public name: string;
 
   @Column({ name: "is_active" })
   public isActive: number;

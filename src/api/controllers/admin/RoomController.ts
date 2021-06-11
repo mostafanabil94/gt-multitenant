@@ -167,7 +167,7 @@ export class RoomController {
     @QueryParam("limit") limit: number,
     @QueryParam("offset") offset: number,
     @QueryParam("branchId") branchId: number,
-    @QueryParam("keyword") keyword: number,
+    @QueryParam("keyword") keyword: string,
     @QueryParam("status") status: number,
     @QueryParam("count") count: number | boolean,
     @Res() response: any
@@ -175,23 +175,29 @@ export class RoomController {
     const select = ["branchId", "name", "isActive"];
     const whereConditions = [
       {
-        name: "branchId",
-        op: "where",
-        value: branchId,
-      },
-      {
-        name: "name",
-        op: "where",
-        value: keyword,
-      },
-      {
         name: "isActive",
-        op: "like",
+        op: "where",
         value: status,
       },
     ];
 
     const search = [];
+
+    if (keyword !== undefined && keyword !== '') {
+      search.push({
+        name: "name",
+        op: "like",
+        value: keyword,
+      });
+    }
+
+    if (branchId !== undefined) {
+      search.push({
+        name: "branchId",
+        op: "where",
+        value: branchId,
+      });
+    }
 
     const relation = [];
 

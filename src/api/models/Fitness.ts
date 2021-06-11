@@ -4,11 +4,13 @@ import {
   BeforeInsert,
   BeforeUpdate,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from "typeorm";
 import { BaseModel } from "./BaseModel";
 import * as bcrypt from "bcrypt";
 import moment = require("moment/moment");
 import { Exclude } from "class-transformer";
+import { BranchFitness } from "./BranchFitness";
 
 @Entity("fitness")
 export class Fitness extends BaseModel {
@@ -34,7 +36,7 @@ export class Fitness extends BaseModel {
     });
   }
 
-  @PrimaryGeneratedColumn({ name: "fitnessId" })
+  @PrimaryGeneratedColumn({ name: "fitness_id" })
   public fitnessId: number;
 
   @Column({ name: "first_name" })
@@ -82,6 +84,9 @@ export class Fitness extends BaseModel {
   @Exclude()
   @Column({ name: "is_active" })
   public isActive: number;
+
+  @OneToMany((type) => BranchFitness, (branchFitness) => branchFitness.branch)
+  public branchFitness: BranchFitness[];
 
   @BeforeInsert()
   public async createDetails(): Promise<void> {

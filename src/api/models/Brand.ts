@@ -10,6 +10,7 @@ import { BaseModel } from "./BaseModel";
 import moment = require("moment/moment");
 import { Branch } from "./Branch";
 import { BrandAdmin } from "./BrandAdmin";
+import { BrandMembership } from "./BrandMembership";
 
 @Entity("brand")
 export class Brand extends BaseModel {
@@ -54,6 +55,9 @@ export class Brand extends BaseModel {
 
   @OneToMany((type) => BrandAdmin, (brandAdmin) => brandAdmin.brand)
   public brandAdmin: BrandAdmin[];
+
+  @OneToMany((type) => BrandMembership, (brandMembership) => brandMembership.brand)
+  public brandMembership: BrandMembership[];
 
   @BeforeInsert()
   public async createDetails(): Promise<void> {

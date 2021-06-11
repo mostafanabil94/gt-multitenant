@@ -13,6 +13,10 @@ import moment = require("moment/moment");
 import { Brand } from "./Brand";
 import { BranchAdmin } from "./BranchAdmin";
 import { Room } from "./Room";
+import { BranchFitness } from "./BranchFitness";
+import { BranchSales } from "./BranchSales";
+import { BranchCustomerService } from "./BranchCustomerService";
+import { BranchMembership } from "./BranchMembership";
 
 @Entity("branch")
 export class Branch extends BaseModel {
@@ -61,6 +65,18 @@ export class Branch extends BaseModel {
 
   @OneToMany((type) => BranchAdmin, (branchAdmin) => branchAdmin.branch)
   public branchAdmin: BranchAdmin[];
+
+  @OneToMany((type) => BranchFitness, (branchFitness) => branchFitness.branch)
+  public branchFitness: BranchFitness[];
+
+  @OneToMany((type) => BranchSales, (branchSales) => branchSales.branch)
+  public branchSales: BranchSales[];
+
+  @OneToMany((type) => BranchCustomerService, (branchCustomerService) => branchCustomerService.branch)
+  public branchCustomerService: BranchCustomerService[];
+
+  @OneToMany((type) => BranchMembership, (branchMembership) => branchMembership.branch)
+  public branchMembership: BranchMembership[];
 
   @OneToMany((type) => Room, (room) => room.branch)
   public room: Room[];

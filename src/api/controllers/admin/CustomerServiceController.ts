@@ -114,8 +114,9 @@ export class CustomerServiceController {
       customerServiceParam.password === customerServiceParam.confirmPassword
     ) {
       const password = await User.hashPassword(customerServiceParam.password);
-      newCustomerService.firstName = customerServiceParam.username;
-      newCustomerService.username = customerServiceParam.email;
+      newCustomerService.firstName = customerServiceParam.firstName;
+      newCustomerService.lastName = customerServiceParam.lastName;
+      newCustomerService.username = customerServiceParam.username;
       newCustomerService.email = customerServiceParam.email;
       newCustomerService.mobileNumber = customerServiceParam.mobileNumber;
       newCustomerService.password = password;
@@ -282,7 +283,7 @@ export class CustomerServiceController {
   ): Promise<any> {
     const customerService = await this.customerServiceService.findOne({
       where: {
-        id,
+        customerServiceId: id,
       },
     });
     if (!customerService) {
@@ -355,7 +356,7 @@ export class CustomerServiceController {
     console.log(customerServiceParam);
     const customerService = await this.customerServiceService.findOne({
       where: {
-        id,
+        customerServiceId: id,
       },
     });
     if (!customerService) {
@@ -397,8 +398,9 @@ export class CustomerServiceController {
         customerService.avatar = name;
         customerService.avatarPath = path;
       }
-      customerService.firstName = customerServiceParam.username;
-      customerService.username = customerServiceParam.email;
+      customerService.firstName = customerServiceParam.firstName;
+      customerService.lastName = customerServiceParam.lastName;
+      customerService.username = customerServiceParam.username;
       customerService.email = customerServiceParam.email;
       customerService.mobileNumber = customerServiceParam.mobileNumber;
       if (customerServiceParam.password) {

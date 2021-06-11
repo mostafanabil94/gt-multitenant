@@ -8,7 +8,7 @@ export class FitnessRepository extends Repository<Fitness> {
       Fitness,
       "fitness"
     );
-    query.select(["COUNT(fitness.id) as fitnessCount"]);
+    query.select(["COUNT(fitness.fitnessId) as fitnessCount"]);
     query.where("DATE(fitness.createdDate) = :todaydate", { todaydate });
     console.log(query.getQuery());
     return query.getRawOne();

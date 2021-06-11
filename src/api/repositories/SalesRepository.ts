@@ -5,7 +5,7 @@ import { Sales } from "../models/Sales";
 export class SalesRepository extends Repository<Sales> {
   public async TodaySalesCount(todaydate: string): Promise<any> {
     const query: any = await this.manager.createQueryBuilder(Sales, "sales");
-    query.select(["COUNT(sales.id) as salesCount"]);
+    query.select(["COUNT(sales.salesId) as salesCount"]);
     query.where("DATE(sales.createdDate) = :todaydate", { todaydate });
     console.log(query.getQuery());
     return query.getRawOne();

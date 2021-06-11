@@ -112,12 +112,14 @@ export class FitnessController {
     }
     if (fitnessParam.password === fitnessParam.confirmPassword) {
       const password = await User.hashPassword(fitnessParam.password);
-      newFitness.firstName = fitnessParam.username;
-      newFitness.username = fitnessParam.email;
+      newFitness.firstName = fitnessParam.firstName;
+      newFitness.lastName = fitnessParam.lastName;
+      newFitness.username = fitnessParam.username;
       newFitness.email = fitnessParam.email;
       newFitness.mobileNumber = fitnessParam.mobileNumber;
       newFitness.password = password;
       newFitness.mailStatus = fitnessParam.mailStatus;
+      newFitness.newsletter = fitnessParam.newsletter;
       newFitness.deleteFlag = 0;
       newFitness.isActive = fitnessParam.status;
 
@@ -227,12 +229,14 @@ export class FitnessController {
     ];
     const relation = [];
 
+    const select = [];
+
     const fitnessList = await this.fitnessService.list(
       limit,
       offset,
+      select,
       search,
       WhereConditions,
-      0,
       relation,
       count
     );
@@ -353,7 +357,7 @@ export class FitnessController {
     console.log(fitnessParam);
     const fitness = await this.fitnessService.findOne({
       where: {
-        id,
+        fitnessId: id,
       },
     });
     if (!fitness) {
@@ -393,8 +397,9 @@ export class FitnessController {
         fitness.avatar = name;
         fitness.avatarPath = path;
       }
-      fitness.firstName = fitnessParam.username;
-      fitness.username = fitnessParam.email;
+      fitness.firstName = fitnessParam.firstName;
+      fitness.lastName = fitnessParam.lastName;
+      fitness.username = fitnessParam.username;
       fitness.email = fitnessParam.email;
       fitness.mobileNumber = fitnessParam.mobileNumber;
       if (fitnessParam.password) {
@@ -402,6 +407,7 @@ export class FitnessController {
         fitness.password = password;
       }
       fitness.mailStatus = fitnessParam.mailStatus;
+      fitness.newsletter = fitnessParam.newsletter;
       fitness.isActive = fitnessParam.status;
       const fitnessSave = await this.fitnessService.create(fitness);
       if (fitnessSave) {
@@ -448,7 +454,7 @@ export class FitnessController {
   @Get("/fitness-details/:id")
   @Authorized()
   public async fitnessDetails(
-    @Param("id") Id: number,
+    @Param("id") id: number,
     @Res() response: any
   ): Promise<any> {
     const fitness = await this.fitnessService.findOne({
@@ -462,7 +468,7 @@ export class FitnessController {
         "isActive",
         "mailStatus",
       ],
-      where: { fitnessId: Id },
+      where: { fitnessId: id },
     });
     if (!fitness) {
       const errorResponse: any = {
@@ -713,7 +719,7 @@ export class FitnessController {
         dataId.lastName = "";
       }
       rows.push([
-        dataId.id,
+        dataId.fitnessId,
         dataId.firstName + " " + dataId.lastName,
         dataId.username,
         dataId.email,
@@ -826,7 +832,7 @@ export class FitnessController {
         fitness.lastName = "";
       }
       rows.push([
-        fitness.id,
+        fitness.fitnessId,
         fitness.firstName + " " + fitness.lastName,
         fitness.username,
         fitness.email,

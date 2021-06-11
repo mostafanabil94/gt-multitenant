@@ -112,8 +112,9 @@ export class SalesController {
     }
     if (salesParam.password === salesParam.confirmPassword) {
       const password = await User.hashPassword(salesParam.password);
-      newSales.firstName = salesParam.username;
-      newSales.username = salesParam.email;
+      newSales.firstName = salesParam.firstName;
+      newSales.lastName = salesParam.lastName;
+      newSales.username = salesParam.username;
       newSales.email = salesParam.email;
       newSales.mobileNumber = salesParam.mobileNumber;
       newSales.password = password;
@@ -278,7 +279,7 @@ export class SalesController {
   ): Promise<any> {
     const sales = await this.salesService.findOne({
       where: {
-        id,
+        salesId: id,
       },
     });
     if (!sales) {
@@ -349,7 +350,7 @@ export class SalesController {
     console.log(salesParam);
     const sales = await this.salesService.findOne({
       where: {
-        id,
+        salesId: id,
       },
     });
     if (!sales) {
@@ -389,8 +390,9 @@ export class SalesController {
         sales.avatar = name;
         sales.avatarPath = path;
       }
-      sales.firstName = salesParam.username;
-      sales.username = salesParam.email;
+      sales.firstName = salesParam.firstName;
+      sales.lastName = salesParam.lastName;
+      sales.username = salesParam.username;
       sales.email = salesParam.email;
       sales.mobileNumber = salesParam.mobileNumber;
       if (salesParam.password) {
@@ -707,7 +709,7 @@ export class SalesController {
         dataId.lastName = "";
       }
       rows.push([
-        dataId.id,
+        dataId.salesId,
         dataId.firstName + " " + dataId.lastName,
         dataId.username,
         dataId.email,
@@ -820,7 +822,7 @@ export class SalesController {
         sales.lastName = "";
       }
       rows.push([
-        sales.id,
+        sales.salesId,
         sales.firstName + " " + sales.lastName,
         sales.username,
         sales.email,
