@@ -5,7 +5,7 @@ export class CreateMembershipPlanRequest {
   @IsNotEmpty({
     message: "name is required",
   })
-  public name: number;
+  public name: string;
 
   @IsNotEmpty({
     message: "membershipId is required",
@@ -15,7 +15,7 @@ export class CreateMembershipPlanRequest {
   @IsNotEmpty({
     message: "isMultipleClients is required",
   })
-  public isMultipleClients: boolean;
+  public isMultipleClients: number;
 
   public maxNumberOfClients: number;
 
@@ -38,19 +38,19 @@ export class CreateMembershipPlanRequest {
 
   public everyPeriod: number;
 
-  public isStartMonth: boolean;
+  public isStartMonth: number;
 
-  public isFreePeriod: boolean;
+  public isFreePeriod: number;
 
-  public isProrate: boolean;
+  public isProrate: number;
 
-  public isEndingPeriod: boolean;
+  public isEndingPeriod: number;
 
   public endPeriod: number;
 
-  public isAutorenew: boolean;
+  public isAutorenew: number;
 
-  public isJoiningFee: boolean;
+  public isJoiningFee: number;
 
   public joiningFee: number;
 

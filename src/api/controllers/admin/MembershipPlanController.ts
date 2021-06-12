@@ -16,30 +16,52 @@ import { CreateMembershipPlanRequest } from "./requests/CreateMembershipPlanRequ
 import { MembershipPlanService } from "../../services/MembershipPlanService";
 import { MembershipPlan } from "../../models/MembershipPlan";
 
-@JsonController("/membershipPlan")
+@JsonController("/membership-plan")
 export class MembershipPlanController {
-  constructor(
-    private membershipPlanService: MembershipPlanService
-  ) {}
+  constructor(private membershipPlanService: MembershipPlanService) {}
 
   // Create Membership Plan API
   /**
-   * @api {post} /api/membership-plan/create-membershipPlan Create Membership Plan API
+   * @api {post} /api/membership-plan/create-membership-plan Create Membership Plan API
    * @apiGroup Membership Plan
    * @apiParam (Request body) {String} name name
-   * @apiParam (Request body) {String} description description
-   * @apiParam (Request body) {String} isPrivate isPrivate
-   * @apiParam (Request body) {String} isOnePurchase isOnePurchase
-   * @apiParam (Request body) {String} isTrial isTrial
+   * @apiParam (Request body) {Number} membershipId membershipId
+   * @apiParam (Request body) {Number} isMultipleClients isMultipleClients
+   * @apiParam (Request body) {Number} maxNumberOfClients maxNumberOfClients
+   * @apiParam (Request body) {Number} type type
+   * @apiParam (Request body) {Number} price price
+   * @apiParam (Request body) {Number} periodType periodType
+   * @apiParam (Request body) {Number} forPeriod forPeriod
+   * @apiParam (Request body) {Number} everyPeriod everyPeriod
+   * @apiParam (Request body) {Number} isStartMonth isStartMonth
+   * @apiParam (Request body) {Number} isFreePeriod isFreePeriod
+   * @apiParam (Request body) {Number} isProrate isProrate
+   * @apiParam (Request body) {Number} isEndingPeriod isEndingPeriod
+   * @apiParam (Request body) {Number} endPeriod endPeriod
+   * @apiParam (Request body) {Number} isAutorenew isAutorenew
+   * @apiParam (Request body) {Number} isJoiningFee isJoiningFee
+   * @apiParam (Request body) {Number} joiningFee joiningFee
    * @apiParam (Request body) {Number} status status
    * @apiHeader {String} Authorization
    * @apiParamExample {json} Input
    * {
    *      "name" : "",
-   *      "description" : "",
-   *      "isPrivate" : "",
-   *      "isOnePurchase" : "",
-   *      "isTrial" : "",
+   *      "membershipId" : "",
+   *      "isMultipleClients" : "",
+   *      "maxNumberOfClients" : "",
+   *      "type" : "",
+   *      "price" : "",
+   *      "periodType" : "",
+   *      "forPeriod" : "",
+   *      "everyPeriod" : "",
+   *      "isStartMonth" : "",
+   *      "isFreePeriod" : "",
+   *      "isProrate" : "",
+   *      "isEndingPeriod" : "",
+   *      "endPeriod" : "",
+   *      "isAutorenew" : "",
+   *      "isJoiningFee" : "",
+   *      "joiningFee" : "",
    *      "status" : "",
    * }
    * @apiSuccessExample {json} Success
@@ -48,14 +70,15 @@ export class MembershipPlanController {
    *      "message": "New MembershipPlan is created successfully",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/membership-plan/create-membershipPlan
+   * @apiSampleRequest /api/membership-plan/create-membership-plan
    * @apiErrorExample {json} createMembershipPlan error
    * HTTP/1.1 500 Internal Server Error
    */
-  @Post("/create-membershipPlan")
+  @Post("/create-membership-plan")
   @Authorized()
   public async createMembershipPlan(
-    @Body({ validate: true }) createMembershipPlanParam: CreateMembershipPlanRequest,
+    @Body({ validate: true })
+    createMembershipPlanParam: CreateMembershipPlanRequest,
     @Res() response: any
   ): Promise<any> {
     console.log(createMembershipPlanParam);
@@ -68,13 +91,36 @@ export class MembershipPlanController {
     if (membershipPlan) {
       const errorResponse: any = {
         status: 0,
-        message: "this membershipPlan already exist",
+        message: "this membership plan name already exist",
       };
       return response.status(400).send(errorResponse);
     }
 
     const newMembershipPlanParams: any = new MembershipPlan();
     newMembershipPlanParams.name = createMembershipPlanParam.name;
+    newMembershipPlanParams.membershipId =
+      createMembershipPlanParam.membershipId;
+    newMembershipPlanParams.isMultipleClients =
+      createMembershipPlanParam.isMultipleClients;
+    newMembershipPlanParams.maxNumberOfClients =
+      createMembershipPlanParam.maxNumberOfClients;
+    newMembershipPlanParams.type = createMembershipPlanParam.type;
+    newMembershipPlanParams.price = createMembershipPlanParam.price;
+    newMembershipPlanParams.periodType = createMembershipPlanParam.periodType;
+    newMembershipPlanParams.forPeriod = createMembershipPlanParam.forPeriod;
+    newMembershipPlanParams.everyPeriod = createMembershipPlanParam.everyPeriod;
+    newMembershipPlanParams.isStartMonth =
+      createMembershipPlanParam.isStartMonth;
+    newMembershipPlanParams.isFreePeriod =
+      createMembershipPlanParam.isFreePeriod;
+    newMembershipPlanParams.isProrate = createMembershipPlanParam.isProrate;
+    newMembershipPlanParams.isEndingPeriod =
+      createMembershipPlanParam.isEndingPeriod;
+    newMembershipPlanParams.endPeriod = createMembershipPlanParam.endPeriod;
+    newMembershipPlanParams.isAutorenew = createMembershipPlanParam.isAutorenew;
+    newMembershipPlanParams.isJoiningFee =
+      createMembershipPlanParam.isJoiningFee;
+    newMembershipPlanParams.joiningFee = createMembershipPlanParam.joiningFee;
     newMembershipPlanParams.isActive = createMembershipPlanParam.status;
     const membershipPlanSaveResponse = await this.membershipPlanService.create(
       newMembershipPlanParams
@@ -82,14 +128,14 @@ export class MembershipPlanController {
     if (membershipPlanSaveResponse) {
       const successResponse: any = {
         status: 1,
-        message: "MembershipPlan saved successfully",
+        message: "Membership plan saved successfully",
         data: membershipPlanSaveResponse,
       };
       return response.status(200).send(successResponse);
     } else {
       const errorResponse: any = {
         status: 0,
-        message: "unable to save MembershipPlan",
+        message: "unable to save Membership plan",
       };
       return response.status(400).send(errorResponse);
     }
@@ -100,19 +146,43 @@ export class MembershipPlanController {
    * @api {put} /api/membership-plan/update-membership-plan/:id Update Membership Plan API
    * @apiGroup Membership Plan
    * @apiParam (Request body) {String} name name
-   * @apiParam (Request body) {String} description description
-   * @apiParam (Request body) {String} isPrivate isPrivate
-   * @apiParam (Request body) {String} isOnePurchase isOnePurchase
-   * @apiParam (Request body) {String} isTrial isTrial
+   * @apiParam (Request body) {Number} membershipId membershipId
+   * @apiParam (Request body) {Number} isMultipleClients isMultipleClients
+   * @apiParam (Request body) {Number} maxNumberOfClients maxNumberOfClients
+   * @apiParam (Request body) {Number} type type
+   * @apiParam (Request body) {Number} price price
+   * @apiParam (Request body) {Number} periodType periodType
+   * @apiParam (Request body) {Number} forPeriod forPeriod
+   * @apiParam (Request body) {Number} everyPeriod everyPeriod
+   * @apiParam (Request body) {Number} isStartMonth isStartMonth
+   * @apiParam (Request body) {Number} isFreePeriod isFreePeriod
+   * @apiParam (Request body) {Number} isProrate isProrate
+   * @apiParam (Request body) {Number} isEndingPeriod isEndingPeriod
+   * @apiParam (Request body) {Number} endPeriod endPeriod
+   * @apiParam (Request body) {Number} isAutorenew isAutorenew
+   * @apiParam (Request body) {Number} isJoiningFee isJoiningFee
+   * @apiParam (Request body) {Number} joiningFee joiningFee
    * @apiParam (Request body) {Number} status status
    * @apiHeader {String} Authorization
    * @apiParamExample {json} Input
    * {
    *      "name" : "",
-   *      "description" : "",
-   *      "isPrivate" : "",
-   *      "isOnePurchase" : "",
-   *      "isTrial" : "",
+   *      "membershipId" : "",
+   *      "isMultipleClients" : "",
+   *      "maxNumberOfClients" : "",
+   *      "type" : "",
+   *      "price" : "",
+   *      "periodType" : "",
+   *      "forPeriod" : "",
+   *      "everyPeriod" : "",
+   *      "isStartMonth" : "",
+   *      "isFreePeriod" : "",
+   *      "isProrate" : "",
+   *      "isEndingPeriod" : "",
+   *      "endPeriod" : "",
+   *      "isAutorenew" : "",
+   *      "isJoiningFee" : "",
+   *      "joiningFee" : "",
    *      "status" : "",
    * }
    * @apiSuccessExample {json} Success
@@ -129,7 +199,8 @@ export class MembershipPlanController {
   @Authorized()
   public async updateMembershipPlan(
     @Param("id") id: number,
-    @Body({ validate: true }) createMembershipPlanParam: CreateMembershipPlanRequest,
+    @Body({ validate: true })
+    createMembershipPlanParam: CreateMembershipPlanRequest,
     @Res() response: any
   ): Promise<any> {
     console.log(createMembershipPlanParam);
@@ -147,47 +218,71 @@ export class MembershipPlanController {
       return response.status(400).send(errorResponse);
     }
 
-    const newMembershipPlanParams: any = new MembershipPlan();
-    newMembershipPlanParams.name = createMembershipPlanParam.name;
-    newMembershipPlanParams.isActive = createMembershipPlanParam.status;
+    membershipPlan.name = createMembershipPlanParam.name;
+    membershipPlan.membershipId = createMembershipPlanParam.membershipId;
+    membershipPlan.isMultipleClients =
+      createMembershipPlanParam.isMultipleClients;
+    membershipPlan.maxNumberOfClients =
+      createMembershipPlanParam.maxNumberOfClients;
+    membershipPlan.type = createMembershipPlanParam.type;
+    membershipPlan.price = createMembershipPlanParam.price;
+    membershipPlan.periodType = createMembershipPlanParam.periodType;
+    membershipPlan.forPeriod = createMembershipPlanParam.forPeriod;
+    membershipPlan.everyPeriod = createMembershipPlanParam.everyPeriod;
+    membershipPlan.isStartMonth = createMembershipPlanParam.isStartMonth;
+    membershipPlan.isFreePeriod = createMembershipPlanParam.isFreePeriod;
+    membershipPlan.isProrate = createMembershipPlanParam.isProrate;
+    membershipPlan.isEndingPeriod = createMembershipPlanParam.isEndingPeriod;
+    membershipPlan.endPeriod = createMembershipPlanParam.endPeriod;
+    membershipPlan.isAutorenew = createMembershipPlanParam.isAutorenew;
+    membershipPlan.isJoiningFee = createMembershipPlanParam.isJoiningFee;
+    membershipPlan.joiningFee = createMembershipPlanParam.joiningFee;
+    membershipPlan.isActive = createMembershipPlanParam.status;
     const membershipPlanSaveResponse = await this.membershipPlanService.update(
       id,
-      newMembershipPlanParams
+      membershipPlan
     );
     if (membershipPlanSaveResponse) {
       const successResponse: any = {
         status: 1,
-        message: "MembershipPlan updated successfully",
+        message: "Membership plan updated successfully",
         data: membershipPlanSaveResponse,
       };
       return response.status(200).send(successResponse);
     } else {
       const errorResponse: any = {
         status: 0,
-        message: "unable to update MembershipPlan",
+        message: "unable to update Membership plan",
       };
       return response.status(400).send(errorResponse);
     }
   }
 
-  // MembershipPlan List API
+  // Membership Plan List API
   /**
-   * @api {get} /api/membership-plan/membershipPlanlist MembershipPlan List API
+   * @api {get} /api/membership-plan/membership-plan-list Membership Plan List API
    * @apiGroup Membership Plan
    * @apiParam (Request body) {Number} limit limit
    * @apiParam (Request body) {Number} offset offset
    * @apiParam (Request body) {String} keyword keyword
+   * @apiParam (Request body) {Number} isMultipleClients isMultipleClients
+   * @apiParam (Request body) {Number} isStartMonth isStartMonth
+   * @apiParam (Request body) {Number} isFreePeriod isFreePeriod
+   * @apiParam (Request body) {Number} isProrate isProrate
+   * @apiParam (Request body) {Number} isEndingPeriod isEndingPeriod
+   * @apiParam (Request body) {Number} isAutorenew isAutorenew
+   * @apiParam (Request body) {Number} isJoiningFee isJoiningFee
    * @apiParam (Request body) {Number} status status
    * @apiParam (Request body) {String} count count in number or boolean
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
    * {
-   *    "message": "Successfully get membershipPlan list",
+   *    "message": "Successfully get membership plan list",
    *    "data":"{}"
    *    "status": "1"
    *  }
-   * @apiSampleRequest /api/membership-plan/membershipPlanlist
+   * @apiSampleRequest /api/membership-plan/membership-plan-list
    * @apiErrorExample {json} membershipPlan error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -197,21 +292,20 @@ export class MembershipPlanController {
     @QueryParam("limit") limit: number,
     @QueryParam("offset") offset: number,
     @QueryParam("keyword") keyword: string,
-    // @QueryParam("isTrial") isTrial: number,
-    // @QueryParam("isPrivate") isPrivate: number,
-    // @QueryParam("isOnePurchase") isOnePurchase: number,
+    @QueryParam("isMultipleClients") isMultipleClients: number,
+    @QueryParam("isStartMonth") isStartMonth: number,
+    @QueryParam("isFreePeriod") isFreePeriod: number,
+    @QueryParam("isProrate") isProrate: number,
+    @QueryParam("isEndingPeriod") isEndingPeriod: number,
+    @QueryParam("isAutorenew") isAutorenew: number,
+    @QueryParam("isJoiningFee") isJoiningFee: number,
     @QueryParam("status") status: number,
     @QueryParam("count") count: number | boolean,
     @Res() response: any
   ): Promise<any> {
     console.log(keyword);
-    const select = ["membershipPlanId", "name", "isActive"];
+    const select = [];
     const whereConditions = [
-      {
-        name: "name",
-        op: "like",
-        value: keyword,
-      },
       {
         name: "isActive",
         op: "where",
@@ -219,15 +313,71 @@ export class MembershipPlanController {
       },
     ];
 
-    // if (isTrial !== undefined) {
-    //     whereConditions.push({
-    //         name: "isTrial",
-    //         op: "where",
-    //         value: isTrial,
-    //     })
-    // }
-
     const search = [];
+
+    if (keyword !== undefined && keyword !== "") {
+      search.push({
+        name: "name",
+        op: "like",
+        value: keyword,
+      });
+    }
+
+    if (isMultipleClients !== undefined) {
+      search.push({
+        name: "isMultipleClients",
+        op: "where",
+        value: isMultipleClients,
+      });
+    }
+
+    if (isStartMonth !== undefined) {
+      search.push({
+        name: "isStartMonth",
+        op: "where",
+        value: isStartMonth,
+      });
+    }
+
+    if (isFreePeriod !== undefined) {
+      search.push({
+        name: "isFreePeriod",
+        op: "where",
+        value: isFreePeriod,
+      });
+    }
+
+    if (isProrate !== undefined) {
+      search.push({
+        name: "isProrate",
+        op: "where",
+        value: isProrate,
+      });
+    }
+
+    if (isEndingPeriod !== undefined) {
+      search.push({
+        name: "isEndingPeriod",
+        op: "where",
+        value: isEndingPeriod,
+      });
+    }
+
+    if (isAutorenew !== undefined) {
+      search.push({
+        name: "isAutorenew",
+        op: "where",
+        value: isAutorenew,
+      });
+    }
+
+    if (isJoiningFee !== undefined) {
+      search.push({
+        name: "isJoiningFee",
+        op: "where",
+        value: isJoiningFee,
+      });
+    }
 
     const relations = [];
 
@@ -242,12 +392,12 @@ export class MembershipPlanController {
     );
     const successResponse: any = {
       status: 1,
-      message: "Successfully get all membershipPlan List",
+      message: "Successfully get all membership plan List",
       data: membershipPlanList,
     };
     return response.status(200).send(successResponse);
   }
-  // delete Membership Plan API
+  // Delete Membership Plan API
   /**
    * @api {delete} /api/membership-plan/delete-membership-plan/:id Delete Membership Plan API
    * @apiGroup Membership Plan
@@ -292,13 +442,13 @@ export class MembershipPlanController {
     if (deleteMembershipPlan) {
       const successResponse: any = {
         status: 1,
-        message: "Successfully deleted membershipPlan",
+        message: "Successfully deleted membership plan",
       };
       return response.status(200).send(successResponse);
     } else {
       const errorResponse: any = {
         status: 0,
-        message: "unable to delete membershipPlan",
+        message: "unable to delete membership plan",
       };
       return response.status(400).send(errorResponse);
     }

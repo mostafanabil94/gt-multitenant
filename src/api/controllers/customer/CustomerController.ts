@@ -1,11 +1,3 @@
-/*
- * spurtcommerce API
- * version 4.2
- * Copyright (c) 2020 piccosoft ltd
- * Author piccosoft ltd <support@piccosoft.com>
- * Licensed under the MIT license.
- */
-
 import "reflect-metadata";
 import {
   Post,
@@ -19,7 +11,7 @@ import {
 } from "routing-controllers";
 import { classToPlain } from "class-transformer";
 import jwt from "jsonwebtoken";
-// import {MAILService} from '../../../auth/mail.services';
+import { MAILService } from "../../../auth/mail.services";
 import { CustomerRegisterRequest } from "./requests/CustomerRegisterRequest";
 import { CustomerLogin } from "./requests/CustomerLoginRequest";
 import { CustomerOauthLogin } from "./requests/CustomerOauthLoginRequest";
@@ -31,7 +23,7 @@ import { CustomerEditProfileRequest } from "./requests/CustomerEditProfileReques
 import { env } from "../../../env";
 import { LoginLog } from "../../models/LoginLog";
 import { CustomerActivity } from "../../models/CustomerActivity";
-// import {EmailTemplateService} from '../../services/EmailTemplateService';
+import { EmailTemplateService } from "../../services/EmailTemplateService";
 import { CustomerActivityService } from "../../services/CustomerActivityService";
 import { ImageService } from "../../services/ImageService";
 import { S3Service } from "../../services/S3Service";
@@ -44,7 +36,7 @@ export class CustomerController {
     private s3Service: S3Service,
     private imageService: ImageService,
     private loginLogService: LoginLogService,
-    // private emailTemplateService: EmailTemplateService,
+    private emailTemplateService: EmailTemplateService,
     private pluginService: PluginService,
     private customerActivityService: CustomerActivityService
   ) {}
@@ -52,19 +44,23 @@ export class CustomerController {
   // Customer Register API
   /**
    * @api {post} /api/customer/register register API
-   * @apiGroup Store
-   * @apiParam (Request body) {String} name Name
-   * @apiParam (Request body) {String} password User Password
-   * @apiParam (Request body) {String} confirmPassword Confirm Password
-   * @apiParam (Request body) {String} emailId User Email Id
-   * @apiParam (Request body) {Number} phoneNumber User Phone Number (Optional)
+   * @apiGroup Customer User
+   * @apiParam (Request body) {String} username username
+   * @apiParam (Request body) {String} firstName firstName
+   * @apiParam (Request body) {String} lastName lastName
+   * @apiParam (Request body) {String} password password
+   * @apiParam (Request body) {String} confirmPassword confirmPassword
+   * @apiParam (Request body) {String} email email
+   * @apiParam (Request body) {String} mobileNumber mobileNumber (Optional)
    * @apiParamExample {json} Input
    * {
-   *      "name" : "",
+   *      "username" : "",
+   *      "firstName" : "",
+   *      "lastName" : "",
    *      "password" : "",
    *      "confirmPassword" : "",
-   *      "emailId" : "",
-   *      "phoneNumber" : "",
+   *      "email" : "",
+   *      "mobileNumber" : "",
    * }
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -84,11 +80,13 @@ export class CustomerController {
     @Res() response: any
   ): Promise<any> {
     const newUser = new Customer();
-    newUser.firstName = registerParam.name;
+    newUser.firstName = registerParam.firstName;
+    newUser.lastName = registerParam.lastName;
+    newUser.type = 0;
     newUser.password = await Customer.hashPassword(registerParam.password);
-    newUser.email = registerParam.emailId;
-    newUser.username = registerParam.emailId;
-    newUser.mobileNumber = registerParam.phoneNumber;
+    newUser.email = registerParam.email;
+    newUser.username = registerParam.username;
+    newUser.mobileNumber = registerParam.mobileNumber;
     newUser.isActive = 1;
     newUser.ip = (
       request.headers["x-forwarded-for"] ||
@@ -97,7 +95,7 @@ export class CustomerController {
       request.connection.socket.remoteAddress
     ).split(",")[0];
     const resultUser = await this.customerService.findOne({
-      where: { email: registerParam.emailId, deleteFlag: 0 },
+      where: { email: registerParam.email, deleteFlag: 0 },
     });
     if (resultUser) {
       const successResponse: any = {
@@ -107,25 +105,35 @@ export class CustomerController {
       return response.status(400).send(successResponse);
     }
     if (registerParam.password === registerParam.confirmPassword) {
-      // const resultData = await this.customerService.create(newUser);
-      // const emailContent = await this.emailTemplateService.findOne(1);
-      // const message = emailContent.content.replace('{name}', resultData.firstName);
+      const resultData = await this.customerService.create(newUser);
+      const emailContent = await this.emailTemplateService.findOne(1);
+      const message = emailContent.content.replace(
+        "{name}",
+        resultData.firstName + " " + resultData.lastName
+      );
+      const redirectUrl = "google.com";
       // const redirectUrl = env.storeRedirectUrl;
-      // const sendMailRes = MAILService.registerMail(message, resultData.email, emailContent.subject, redirectUrl);
-      // if (sendMailRes) {
-      //     const successResponse: any = {
-      //         status: 1,
-      //         message: 'Thank you for registering with us. Kindly check your email inbox for further details. ',
-      //         data: classToPlain(resultData),
-      //     };
-      //     return response.status(200).send(successResponse);
-      // } else {
-      //     const errorResponse: any = {
-      //         status: 0,
-      //         message: 'Registration successful, but unable to send email. ',
-      //     };
-      //     return response.status(400).send(errorResponse);
-      // }
+      const sendMailRes = MAILService.registerMail(
+        message,
+        resultData.email,
+        emailContent.subject,
+        redirectUrl
+      );
+      if (sendMailRes) {
+        const successResponse: any = {
+          status: 1,
+          message:
+            "Thank you for registering with us. Kindly check your email inbox for further details. ",
+          data: classToPlain(resultData),
+        };
+        return response.status(200).send(successResponse);
+      } else {
+        const errorResponse: any = {
+          status: 0,
+          message: "Registration successful, but unable to send email. ",
+        };
+        return response.status(400).send(errorResponse);
+      }
     }
     const errorPasswordResponse: any = {
       status: 0,
@@ -137,11 +145,11 @@ export class CustomerController {
   // Forgot Password API
   /**
    * @api {post} /api/customer/forgot-password Forgot Password API
-   * @apiGroup Store
-   * @apiParam (Request body) {String} emailId User Email Id
+   * @apiGroup Customer User
+   * @apiParam (Request body) {String} email email
    * @apiParamExample {json} Input
    * {
-   *      "emailId" : ""
+   *      "email" : ""
    * }
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -160,7 +168,7 @@ export class CustomerController {
     @Res() response: any
   ): Promise<any> {
     const resultData = await this.customerService.findOne({
-      where: { email: forgotparam.emailId, deleteFlag: 0 },
+      where: { email: forgotparam.email, deleteFlag: 0 },
     });
     if (!resultData) {
       const errorResponse: any = {
@@ -171,37 +179,48 @@ export class CustomerController {
     }
     const tempPassword: any = Math.random().toString().substr(2, 5);
     resultData.password = await Customer.hashPassword(tempPassword);
-    // const updateUserData = await this.customerService.update(resultData.id, resultData);
-    // const emailContent = await this.emailTemplateService.findOne(2);
-    // const message = emailContent.content.replace('{name}', updateUserData.username).replace('{xxxxxx}', tempPassword);
-    // emailContent.content = message;
-    // // const redirectUrl = env.storeRedirectUrl;
-    // // const sendMailRes = MAILService.passwordForgotMail(message, updateUserData.email, emailContent.subject, redirectUrl);
-    // if (sendMailRes) {
-    //     const successResponse: any = {
-    //         status: 1,
-    //         message: 'Your password has been sent to your email inbox.',
-    //     };
-    //     return response.status(200).send(successResponse);
-    // } else {
-    //     const errorResponse: any = {
-    //         status: 0,
-    //         message: 'Error in sending email, Invalid email.',
-    //     };
-    //     return response.status(400).send(errorResponse);
-    // }
+    const updateUserData = await this.customerService.update(
+      resultData.id,
+      resultData
+    );
+    const emailContent = await this.emailTemplateService.findOne(2);
+    const message = emailContent.content
+      .replace("{name}", updateUserData.username)
+      .replace("{xxxxxx}", tempPassword);
+    emailContent.content = message;
+    const redirectUrl = "google.com";
+    // const redirectUrl = env.storeRedirectUrl;
+    const sendMailRes = MAILService.passwordForgotMail(
+      message,
+      updateUserData.email,
+      emailContent.subject,
+      redirectUrl
+    );
+    if (sendMailRes) {
+      const successResponse: any = {
+        status: 1,
+        message: "Your password has been sent to your email inbox.",
+      };
+      return response.status(200).send(successResponse);
+    } else {
+      const errorResponse: any = {
+        status: 0,
+        message: "Error in sending email, Invalid email.",
+      };
+      return response.status(400).send(errorResponse);
+    }
   }
 
   // Login API
   /**
    * @api {post} /api/customer/login login API
-   * @apiGroup Store
-   * @apiParam (Request body) {String} emailId User Email Id
-   * @apiParam (Request body) {String} password User Password
-   * @apiParam (Request body) {String} type  send as normal | facebook | gmail
+   * @apiGroup Customer User
+   * @apiParam (Request body) {String} email email
+   * @apiParam (Request body) {String} password password
+   * @apiParam (Request body) {String} type type
    * @apiParamExample {json} Input
    * {
-   *      "emailId" : "",
+   *      "email" : "",
    *      "password" : "",
    *      "type" : "",
    * }
@@ -238,7 +257,7 @@ export class CustomerController {
           "avatarPath",
           "isActive",
         ],
-        where: { email: loginParam.emailId, deleteFlag: 0 },
+        where: { email: loginParam.email, deleteFlag: 0 },
       });
       if (!resultData) {
         const errorUserNameResponse: any = {
@@ -276,7 +295,7 @@ export class CustomerController {
         ).split(",")[0];
         const savedloginLog = await this.loginLogService.create(loginLog);
         const customer = await this.customerService.findOne({
-          where: { email: loginParam.emailId, deleteFlag: 0 },
+          where: { email: loginParam.email, deleteFlag: 0 },
         });
         customer.lastLogin = savedloginLog.createdDate;
         await this.customerService.create(customer);
@@ -348,7 +367,7 @@ export class CustomerController {
   // Change Password API
   /**
    * @api {post} /api/customer/change-password Change Password API
-   * @apiGroup Store
+   * @apiGroup Customer User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} oldPassword Old Password
    * @apiParam (Request body) {String} newPassword New Password
@@ -419,7 +438,7 @@ export class CustomerController {
   // Get Customer Profile API
   /**
    * @api {get} /api/customer/get-profile Get Profile API
-   * @apiGroup Store
+   * @apiGroup Customer User
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -453,12 +472,12 @@ export class CustomerController {
   // Customer Edit Profile API
   /**
    * @api {post} /api/customer/edit-profile Edit Profile API
-   * @apiGroup Store
+   * @apiGroup Customer User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} firstName First Name
    * @apiParam (Request body) {String} lastName Last Name
    * @apiParam (Request body) {String} password password
-   * @apiParam (Request body) {String} emailId User Email Id
+   * @apiParam (Request body) {String} emailId User Email
    * @apiParam (Request body) {Number} phoneNumber User Phone Number (Optional)
    * @apiParam (Request body) {String} image Customer Image
    * @apiParamExample {json} Input
@@ -466,7 +485,7 @@ export class CustomerController {
    *      "firstName" : "",
    *      "lastName" : "",
    *      "password" "",
-   *      "emailId" : "",
+   *      "email" : "",
    *      "phoneNumber" : "",
    *      "image": "",
    * }
@@ -500,9 +519,7 @@ export class CustomerController {
         "email",
         "mobileNumber",
         "address",
-        "zoneId",
         "countryId",
-        "pincode",
         "avatar",
         "avatarPath",
         "password",
@@ -531,7 +548,7 @@ export class CustomerController {
     resultData.lastName = customerEditProfileRequest.lastName;
     resultData.email = customerEditProfileRequest.emailId;
     resultData.mobileNumber = customerEditProfileRequest.phoneNumber;
-    resultData.username = customerEditProfileRequest.emailId;
+    resultData.username = customerEditProfileRequest.username;
     if (customerEditProfileRequest.password) {
       // if (await Customer.comparePassword(resultData, customerEditProfileRequest.oldPassword)) {
       resultData.password = await Customer.hashPassword(
@@ -565,7 +582,7 @@ export class CustomerController {
   // logList API
   /**
    * @api {get} /api/customer/login-log-list Login Log list API
-   * @apiGroup Store
+   * @apiGroup Customer User
    * @apiParam (Request body) {Number} limit limit
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -612,7 +629,7 @@ export class CustomerController {
   // Oauth Login API
   /**
    * @api {post} /api/customer/Oauth-login Oauth login API
-   * @apiGroup Store
+   * @apiGroup Customer User
    * @apiParam (Request body) {String} emailId User Email Id
    * @apiParam (Request body) {String} source source
    * @apiParam (Request body) {String} oauthData oauthData
@@ -660,27 +677,36 @@ export class CustomerController {
         request.socket.remoteAddress ||
         request.connection.socket.remoteAddress
       ).split(",")[0];
-      // const newCustomer = await this.customerService.create(newUser);
+      const newCustomer = await this.customerService.create(newUser);
       // create a token
-      // const token = jwt.sign({id: newCustomer.id}, '123##$$)(***&', {
-      //     expiresIn: 86400, // expires in 24 hours
-      // });
-      // const emailContent = await this.emailTemplateService.findOne(1);
-      // const message = emailContent.content.replace('{name}', newCustomer.username);
+      const token = jwt.sign({ id: newCustomer.id }, "123##$$)(***&", {
+        expiresIn: 86400, // expires in 24 hours
+      });
+      const emailContent = await this.emailTemplateService.findOne(1);
+      const message = emailContent.content.replace(
+        "{name}",
+        newCustomer.username
+      );
+      const redirectUrl = "google.com";
       // const redirectUrl = env.storeRedirectUrl;
-      // const sendMailRes = MAILService.registerMail(message, newCustomer.email, emailContent.subject, redirectUrl);
-      // if (sendMailRes) {
-      //     const successResponse: any = {
-      //         status: 1,
-      //         message: 'Loggedin successfully. ',
-      //         data: {
-      //             token,
-      //             user: classToPlain(resultData),
-      //             password: tempPassword,
-      //         },
-      //     };
-      //     return response.status(200).send(successResponse);
-      // }
+      const sendMailRes = MAILService.registerMail(
+        message,
+        newCustomer.email,
+        emailContent.subject,
+        redirectUrl
+      );
+      if (sendMailRes) {
+        const successResponse: any = {
+          status: 1,
+          message: "Loggedin successfully. ",
+          data: {
+            token,
+            user: classToPlain(resultData),
+            password: tempPassword,
+          },
+        };
+        return response.status(200).send(successResponse);
+      }
     } else {
       // create a token
       const token = jwt.sign({ id: resultData.id }, "123##$$)(***&", {

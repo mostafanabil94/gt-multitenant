@@ -46,8 +46,29 @@ export class Customer extends BaseModel {
   @Column({ name: "first_name" })
   public firstName: string;
 
+  @Column({ name: "middle_name" })
+  public middleName: string;
+
   @Column({ name: "last_name" })
   public lastName: string;
+
+  @Column({ name: "full_name" })
+  public fullName: string;
+
+  @Column({ name: "gender" })
+  public gender: number;
+
+  @Column({ name: "type" })
+  public type: number;
+
+  @Column({ name: "source" })
+  public source: number;
+
+  @Column({ name: "dob" })
+  public dob: string;
+
+  @Column({ name: "membership_code" })
+  public membershipCode: string;
 
   @Column({ name: "username" })
   public username: string;

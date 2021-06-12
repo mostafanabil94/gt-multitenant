@@ -1,41 +1,38 @@
-/*
- * spurtcommerce API
- * version 4.2
- * Copyright (c) 2020 piccosoft ltd
- * Author piccosoft ltd <support@piccosoft.com>
- * Licensed under the MIT license.
- */
-
-import 'reflect-metadata';
-import {IsNotEmpty, IsEmail, IsOptional, MinLength} from 'class-validator';
+import "reflect-metadata";
+import { IsNotEmpty, IsEmail, IsOptional, MinLength } from "class-validator";
 
 export class CustomerEditProfileRequest {
-    // @IsString()
-    @IsNotEmpty({
-        message: 'First name is required',
-    })
-    public firstName: string;
+  // @IsString()
+  @IsNotEmpty({
+    message: "First name is required",
+  })
+  public firstName: string;
 
-    public lastName: string;
+  public lastName: string;
 
-    @IsOptional()
-    @MinLength(5, {
-        message: 'Old Password is minimum 5 character',
-    })
-    @IsNotEmpty()
-    public password: string;
+  public username: string;
 
-    @IsEmail({}, {
-        message: 'Please provide username as emailId',
-    })
-    @IsNotEmpty({
-        message: 'Email Id is required',
-    })
-    public emailId: string;
+  @IsOptional()
+  @MinLength(5, {
+    message: "Old Password is minimum 5 character",
+  })
+  @IsNotEmpty()
+  public password: string;
 
-    @IsOptional()
-    @IsNotEmpty()
-    public phoneNumber: number;
+  @IsEmail(
+    {},
+    {
+      message: "Please provide username as emailId",
+    }
+  )
+  @IsNotEmpty({
+    message: "Email Id is required",
+  })
+  public emailId: string;
 
-    public image: string;
+  @IsOptional()
+  @IsNotEmpty()
+  public phoneNumber: number;
+
+  public image: string;
 }
