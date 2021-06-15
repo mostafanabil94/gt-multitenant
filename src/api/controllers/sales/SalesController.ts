@@ -7,44 +7,38 @@ import {
   Authorized,
   Req,
   Get,
-  QueryParam,
+  // QueryParam,
 } from "routing-controllers";
 import { classToPlain } from "class-transformer";
 import jwt from "jsonwebtoken";
 import { MAILService } from "../../../auth/mail.services";
-import { CustomerRegisterRequest } from "./requests/CustomerRegisterRequest";
-import { CustomerLogin } from "./requests/CustomerLoginRequest";
-import { CustomerOauthLogin } from "./requests/CustomerOauthLoginRequest";
+import { SalesRegisterRequest } from "./requests/SalesRegisterRequest";
+import { SalesLogin } from "./requests/SalesLoginRequest";
+import { SalesOauthLogin } from "./requests/SalesOauthLoginRequest";
 import { ChangePassword } from "./requests/changePasswordRequest";
-import { Customer } from "../../models/Customer";
-import { CustomerService } from "../../services/CustomerService";
-import { LoginLogService } from "../../services/LoginLogService";
-import { CustomerEditProfileRequest } from "./requests/CustomerEditProfileRequest";
+import { Sales } from "../../models/Sales";
+import { SalesService } from "../../services/SalesService";
+import { SalesEditProfileRequest } from "./requests/SalesEditProfileRequest";
 import { env } from "../../../env";
-import { LoginLog } from "../../models/LoginLog";
-import { CustomerActivity } from "../../models/CustomerActivity";
 import { EmailTemplateService } from "../../services/EmailTemplateService";
-import { CustomerActivityService } from "../../services/CustomerActivityService";
 import { ImageService } from "../../services/ImageService";
 import { S3Service } from "../../services/S3Service";
 import { PluginService } from "../../services/PluginService";
 
-@JsonController("/customer")
-export class CustomerController {
+@JsonController("/sales")
+export class SalesController {
   constructor(
-    private customerService: CustomerService,
+    private salesService: SalesService,
     private s3Service: S3Service,
     private imageService: ImageService,
-    private loginLogService: LoginLogService,
     private emailTemplateService: EmailTemplateService,
-    private pluginService: PluginService,
-    private customerActivityService: CustomerActivityService
+    private pluginService: PluginService
   ) {}
 
-  // Customer Register API
+  // Sales Register API
   /**
-   * @api {post} /api/customer/register register API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/register register API
+   * @apiGroup Sales User
    * @apiParam (Request body) {String} username username
    * @apiParam (Request body) {String} firstName firstName
    * @apiParam (Request body) {String} lastName lastName
@@ -68,26 +62,24 @@ export class CustomerController {
    *      "message": "Thank you for registering with us and please check your email",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/register
+   * @apiSampleRequest /api/sales/register
    * @apiErrorExample {json} Register error
    * HTTP/1.1 500 Internal Server Error
    */
-  // Customer Register Function
+  // Sales Register Function
   @Post("/register")
   public async register(
-    @Body({ validate: true }) registerParam: CustomerRegisterRequest,
+    @Body({ validate: true }) registerParam: SalesRegisterRequest,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const newUser = new Customer();
+    const newUser = new Sales();
     newUser.firstName = registerParam.firstName;
     newUser.lastName = registerParam.lastName;
-    newUser.type = 0;
-    newUser.password = await Customer.hashPassword(registerParam.password);
+    newUser.password = await Sales.hashPassword(registerParam.password);
     newUser.email = registerParam.email;
     newUser.username = registerParam.username;
     newUser.mobileNumber = registerParam.mobileNumber;
-    newUser.customerGroupId = 1;
     newUser.isActive = 1;
     newUser.ip = (
       request.headers["x-forwarded-for"] ||
@@ -95,7 +87,7 @@ export class CustomerController {
       request.socket.remoteAddress ||
       request.connection.socket.remoteAddress
     ).split(",")[0];
-    const resultUser = await this.customerService.findOne({
+    const resultUser = await this.salesService.findOne({
       where: { email: registerParam.email, deleteFlag: 0 },
     });
     if (resultUser) {
@@ -106,7 +98,7 @@ export class CustomerController {
       return response.status(400).send(successResponse);
     }
     if (registerParam.password === registerParam.confirmPassword) {
-      const resultData = await this.customerService.create(newUser);
+      const resultData = await this.salesService.create(newUser);
       const emailContent = await this.emailTemplateService.findOne(1);
       const message = emailContent.content.replace(
         "{name}",
@@ -145,8 +137,8 @@ export class CustomerController {
 
   // Forgot Password API
   /**
-   * @api {post} /api/customer/forgot-password Forgot Password API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/forgot-password Forgot Password API
+   * @apiGroup Sales User
    * @apiParam (Request body) {String} email email
    * @apiParamExample {json} Input
    * {
@@ -158,7 +150,7 @@ export class CustomerController {
    *      "message": "Thank you,Your password send to your mail id please check your email.",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/forgot-password
+   * @apiSampleRequest /api/sales/forgot-password
    * @apiErrorExample {json} Forgot Password error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -168,7 +160,7 @@ export class CustomerController {
     @Body({ validate: true }) forgotparam: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.customerService.findOne({
+    const resultData = await this.salesService.findOne({
       where: { email: forgotparam.email, deleteFlag: 0 },
     });
     if (!resultData) {
@@ -179,8 +171,8 @@ export class CustomerController {
       return response.status(400).send(errorResponse);
     }
     const tempPassword: any = Math.random().toString().substr(2, 5);
-    resultData.password = await Customer.hashPassword(tempPassword);
-    const updateUserData = await this.customerService.update(
+    resultData.password = await Sales.hashPassword(tempPassword);
+    const updateUserData = await this.salesService.update(
       resultData.id,
       resultData
     );
@@ -214,8 +206,8 @@ export class CustomerController {
 
   // Login API
   /**
-   * @api {post} /api/customer/login login API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/login login API
+   * @apiGroup Sales User
    * @apiParam (Request body) {String} email email
    * @apiParam (Request body) {String} password password
    * @apiParam (Request body) {String} type type
@@ -234,20 +226,20 @@ export class CustomerController {
    *      "message": "Successfully login",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/login
+   * @apiSampleRequest /api/sales/login
    * @apiErrorExample {json} Login error
    * HTTP/1.1 500 Internal Server Error
    */
   // Login Function
   @Post("/login")
   public async login(
-    @Body({ validate: true }) loginParam: CustomerLogin,
+    @Body({ validate: true }) loginParam: SalesLogin,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
     // select:['id','firstName','email','mobileNumber','avatar', 'avatarPath'],
     if (loginParam.type === "normal") {
-      const resultData = await this.customerService.findOne({
+      const resultData = await this.salesService.findOne({
         select: [
           "id",
           "firstName",
@@ -270,36 +262,36 @@ export class CustomerController {
       if (resultData.isActive === 0) {
         const errorUserInActiveResponse: any = {
           status: 0,
-          message: "InActive Customer.",
+          message: "InActive Sales.",
         };
         return response.status(400).send(errorUserInActiveResponse);
       }
-      if (await Customer.comparePassword(resultData, loginParam.password)) {
+      if (await Sales.comparePassword(resultData, loginParam.password)) {
         // create a token
         const token = jwt.sign({ id: resultData.id }, "123##$$)(***&");
 
-        const customerActivity = new CustomerActivity();
-        customerActivity.customerId = resultData.id;
-        customerActivity.activityId = 1;
-        customerActivity.description = "loggedIn";
-        await this.customerActivityService.create(customerActivity);
+        // const customerActivity = new CustomerActivity();
+        // customerActivity.customerId = resultData.id;
+        // customerActivity.activityId = 1;
+        // customerActivity.description = "loggedIn";
+        // await this.customerActivityService.create(customerActivity);
 
-        const loginLog = new LoginLog();
-        loginLog.customerId = resultData.id;
-        loginLog.emailId = resultData.email;
-        loginLog.firstName = resultData.firstName;
-        loginLog.ipAddress = (
-          request.headers["x-forwarded-for"] ||
-          request.connection.remoteAddress ||
-          request.socket.remoteAddress ||
-          request.connection.socket.remoteAddress
-        ).split(",")[0];
-        const savedloginLog = await this.loginLogService.create(loginLog);
-        const customer = await this.customerService.findOne({
+        // const loginLog = new LoginLog();
+        // loginLog.customerId = resultData.id;
+        // loginLog.emailId = resultData.email;
+        // loginLog.firstName = resultData.firstName;
+        // loginLog.ipAddress = (
+        //   request.headers["x-forwarded-for"] ||
+        //   request.connection.remoteAddress ||
+        //   request.socket.remoteAddress ||
+        //   request.connection.socket.remoteAddress
+        // ).split(",")[0];
+        // const savedloginLog = await this.loginLogService.create(loginLog);
+        const customer = await this.salesService.findOne({
           where: { email: loginParam.email, deleteFlag: 0 },
         });
-        customer.lastLogin = savedloginLog.createdDate;
-        await this.customerService.create(customer);
+        // customer.lastLogin = savedloginLog.createdDate;
+        await this.salesService.create(customer);
         console.log(loginParam.type);
         const successResponse: any = {
           status: 1,
@@ -367,8 +359,8 @@ export class CustomerController {
   }
   // Change Password API
   /**
-   * @api {post} /api/customer/change-password Change Password API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/change-password Change Password API
+   * @apiGroup Sales User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} oldPassword Old Password
    * @apiParam (Request body) {String} newPassword New Password
@@ -382,28 +374,28 @@ export class CustomerController {
    *      "message": "Your password changed successfully",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/change-password
+   * @apiSampleRequest /api/sales/change-password
    * @apiErrorExample {json} Change Password error
    * HTTP/1.1 500 Internal Server Error
    */
   // Change Password Function
   @Post("/change-password")
-  @Authorized("customer")
+  @Authorized("sales")
   public async changePassword(
     @Body({ validate: true }) changePasswordParam: ChangePassword,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.customerService.findOne({
+    const resultData = await this.salesService.findOne({
       where: { id: request.user.id },
     });
     if (
-      await Customer.comparePassword(
+      await Sales.comparePassword(
         resultData,
         changePasswordParam.oldPassword
       )
     ) {
-      const val = await Customer.comparePassword(
+      const val = await Sales.comparePassword(
         resultData,
         changePasswordParam.newPassword
       );
@@ -414,10 +406,10 @@ export class CustomerController {
         };
         return response.status(400).send(errResponse);
       }
-      resultData.password = await Customer.hashPassword(
+      resultData.password = await Sales.hashPassword(
         changePasswordParam.newPassword
       );
-      const updateUserData = await this.customerService.update(
+      const updateUserData = await this.salesService.update(
         resultData.id,
         resultData
       );
@@ -438,8 +430,8 @@ export class CustomerController {
 
   // Get Customer Profile API
   /**
-   * @api {get} /api/customer/get-profile Get Profile API
-   * @apiGroup Customer User
+   * @api {get} /api/sales/get-profile Get Profile API
+   * @apiGroup Sales User
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -448,18 +440,18 @@ export class CustomerController {
    *      "status": "1"
    *       "data":{}
    * }
-   * @apiSampleRequest /api/customer/get-profile
+   * @apiSampleRequest /api/sales/get-profile
    * @apiErrorExample {json} Get Profile error
    * HTTP/1.1 500 Internal Server Error
    */
   // Get Profile Function
   @Get("/get-profile")
-  @Authorized("customer")
+  @Authorized("sales")
   public async getProfile(
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.customerService.findOne({
+    const resultData = await this.salesService.findOne({
       where: { id: request.user.id },
     });
     const successResponse: any = {
@@ -472,8 +464,8 @@ export class CustomerController {
 
   // Customer Edit Profile API
   /**
-   * @api {post} /api/customer/edit-profile Edit Profile API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/edit-profile Edit Profile API
+   * @apiGroup Sales User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} firstName First Name
    * @apiParam (Request body) {String} middleName Middle Name
@@ -485,21 +477,11 @@ export class CustomerController {
    * @apiParamExample {json} Input
    * {
    *      "firstName" : "",
-   *      "middleName" : "",
    *      "lastName" : "",
-   *      "fullName" : "",
    *      "password": "",
    *      "email" : "",
    *      "mobileNumber" : "",
    *      "image": "",
-   *      "dob": "",
-   *      "source": "",
-   *      "type": "",
-   *      "membershipCode": "",
-   *      "mailStatus": "",
-   *      "address": "",
-   *      "countryId": "",
-   *      "cityId": "",
    * }
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -507,23 +489,23 @@ export class CustomerController {
    *      "message": "Successfully updated your profile.",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/edit-profile
+   * @apiSampleRequest /api/sales/edit-profile
    * @apiErrorExample {json} Register error
    * HTTP/1.1 500 Internal Server Error
    */
   // Customer Profile Edit Function
   @Post("/edit-profile")
-  @Authorized("customer")
+  @Authorized("sales")
   public async editProfile(
     @Body({ validate: true })
-    customerEditProfileRequest: CustomerEditProfileRequest,
+    customerEditProfileRequest: SalesEditProfileRequest,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
     const image = customerEditProfileRequest.image;
     let name;
 
-    const resultData = await this.customerService.findOne({
+    const resultData = await this.salesService.findOne({
       select: [
         "id",
         "firstName",
@@ -566,17 +548,9 @@ export class CustomerController {
       resultData.avatarPath = path;
     }
     resultData.firstName = customerEditProfileRequest.firstName;
-    resultData.middleName = customerEditProfileRequest.middleName;
     resultData.lastName = customerEditProfileRequest.lastName;
-    resultData.fullName = customerEditProfileRequest.fullName;
     resultData.email = customerEditProfileRequest.email;
     resultData.mobileNumber = customerEditProfileRequest.mobileNumber;
-    resultData.gender = customerEditProfileRequest.gender;
-    resultData.source = customerEditProfileRequest.source;
-    resultData.type = customerEditProfileRequest.type;
-    resultData.gender = customerEditProfileRequest.gender;
-    resultData.dob = customerEditProfileRequest.dob;
-    resultData.membershipCode = customerEditProfileRequest.membershipCode;
     resultData.mailStatus = customerEditProfileRequest.mailStatus;
     resultData.address = customerEditProfileRequest.address;
     resultData.countryId = customerEditProfileRequest.countryId;
@@ -584,10 +558,10 @@ export class CustomerController {
     resultData.username = customerEditProfileRequest.username;
     if (customerEditProfileRequest.password) {
       // if (await Customer.comparePassword(resultData, customerEditProfileRequest.oldPassword)) {
-      resultData.password = await Customer.hashPassword(
+      resultData.password = await Sales.hashPassword(
         customerEditProfileRequest.password
       );
-      const updateUserData = await this.customerService.update(
+      const updateUserData = await this.salesService.update(
         resultData.id,
         resultData
       );
@@ -600,7 +574,7 @@ export class CustomerController {
         return response.status(200).send(successResponseResult);
       }
     }
-    const updateuserData = await this.customerService.update(
+    const updateuserData = await this.salesService.update(
       resultData.id,
       resultData
     );
@@ -614,8 +588,8 @@ export class CustomerController {
 
   // logList API
   /**
-   * @api {get} /api/customer/login-log-list Login Log list API
-   * @apiGroup Customer User
+   * @api {get} /api/sales/login-log-list Login Log list API
+   * @apiGroup Sales User
    * @apiParam (Request body) {Number} limit limit
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -630,39 +604,39 @@ export class CustomerController {
    *      "createdDate"
    *      }
    * }
-   * @apiSampleRequest /api/customer/login-log-list
+   * @apiSampleRequest /api/sales/login-log-list
    * @apiErrorExample {json} Front error
    * HTTP/1.1 500 Internal Server Error
    */
-  @Get("/login-log-list")
-  public async LogList(
-    @QueryParam("limit") limit: number,
-    @Res() response: any
-  ): Promise<any> {
-    const loginLogList = await this.loginLogService.logList(limit);
-    const promise = loginLogList.map(async (result: any) => {
-      const moment = require("moment");
-      const createdDate = moment
-        .utc(result.createdDate)
-        .local()
-        .format("YYYY-MM-DD");
-      const temp: any = result;
-      temp.createdDate = createdDate;
-      return temp;
-    });
-    const finalResult = await Promise.all(promise);
-    const successResponse: any = {
-      status: 1,
-      message: "Successfully get login Log list",
-      data: finalResult,
-    };
-    return response.status(200).send(successResponse);
-  }
+  // @Get("/login-log-list")
+  // public async LogList(
+  //   @QueryParam("limit") limit: number,
+  //   @Res() response: any
+  // ): Promise<any> {
+  //   const loginLogList = await this.loginLogService.logList(limit);
+  //   const promise = loginLogList.map(async (result: any) => {
+  //     const moment = require("moment");
+  //     const createdDate = moment
+  //       .utc(result.createdDate)
+  //       .local()
+  //       .format("YYYY-MM-DD");
+  //     const temp: any = result;
+  //     temp.createdDate = createdDate;
+  //     return temp;
+  //   });
+  //   const finalResult = await Promise.all(promise);
+  //   const successResponse: any = {
+  //     status: 1,
+  //     message: "Successfully get login Log list",
+  //     data: finalResult,
+  //   };
+  //   return response.status(200).send(successResponse);
+  // }
 
   // Oauth Login API
   /**
-   * @api {post} /api/customer/Oauth-login Oauth login API
-   * @apiGroup Customer User
+   * @api {post} /api/sales/Oauth-login Oauth login API
+   * @apiGroup Sales User
    * @apiParam (Request body) {String} emailId User Email Id
    * @apiParam (Request body) {String} source source
    * @apiParam (Request body) {String} oauthData oauthData
@@ -682,25 +656,25 @@ export class CustomerController {
    *      "message": "Successfully login",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/customer/Oauth-login
+   * @apiSampleRequest /api/sales/Oauth-login
    * @apiErrorExample {json} Login error
    * HTTP/1.1 500 Internal Server Error
    */
   // Login Function
   @Post("/Oauth-login")
   public async OauthLogin(
-    @Body({ validate: true }) loginParam: CustomerOauthLogin,
+    @Body({ validate: true }) loginParam: SalesOauthLogin,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
     console.log(loginParam.emailId);
-    const resultData = await this.customerService.findOne({
+    const resultData = await this.salesService.findOne({
       where: { email: loginParam.emailId },
     });
     if (!resultData) {
-      const newUser = new Customer();
+      const newUser = new Sales();
       const tempPassword: any = Math.random().toString().substr(2, 5);
-      newUser.password = await Customer.hashPassword(tempPassword);
+      newUser.password = await Sales.hashPassword(tempPassword);
       newUser.email = loginParam.emailId;
       newUser.username = loginParam.emailId;
       newUser.isActive = 1;
@@ -710,7 +684,7 @@ export class CustomerController {
         request.socket.remoteAddress ||
         request.connection.socket.remoteAddress
       ).split(",")[0];
-      const newCustomer = await this.customerService.create(newUser);
+      const newCustomer = await this.salesService.create(newUser);
       // create a token
       const token = jwt.sign({ id: newCustomer.id }, "123##$$)(***&", {
         expiresIn: 86400, // expires in 24 hours

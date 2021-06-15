@@ -64,8 +64,8 @@ export class AlterCustomerTable1623439553355 implements MigrationInterface {
         "customer",
         new TableColumn({
           name: "membership_code",
-          type: "integer",
-          length: "11",
+          type: "varchar",
+          length: "255",
           isPrimary: false,
           isNullable: true,
         })

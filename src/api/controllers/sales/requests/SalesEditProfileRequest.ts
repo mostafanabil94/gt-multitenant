@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { IsNotEmpty, IsEmail, IsOptional, MinLength } from "class-validator";
 
-export class CustomerEditProfileRequest {
+export class SalesEditProfileRequest {
   // @IsString()
   @IsNotEmpty({
     message: "First name is required",
@@ -36,21 +36,7 @@ export class CustomerEditProfileRequest {
 
   public image: string;
 
-  public gender: number;
-
-  public source: number;
-
-  public type: number;
-
-  public dob: string;
-
-  public membershipCode: string;
-
   public mailStatus: number;
-
-  public middleName: string;
-
-  public fullName: string;
 
   public address: string;
 
