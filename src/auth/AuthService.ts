@@ -5,6 +5,9 @@ import { OrmRepository } from 'typeorm-typedi-extensions';
 import { User } from '../api/models/User';
 import { UserRepository } from '../api/repositories/UserRepository';
 import { CustomerRepository } from '../api/repositories/CustomerRepository';
+import { CustomerServiceRepository } from '../api/repositories/CustomerServiceRepository';
+import { FitnessRepository } from '../api/repositories/FitnessRepository';
+import { SalesRepository } from '../api/repositories/SalesRepository';
 import { Logger, LoggerInterface } from '../decorators/Logger';
 
 @Service()
@@ -13,7 +16,10 @@ export class AuthService {
     constructor(
         @Logger(__filename) private log: LoggerInterface,
         @OrmRepository() private userRepository: UserRepository,
-        @OrmRepository() private customerRepository: CustomerRepository
+        @OrmRepository() private customerRepository: CustomerRepository,
+        @OrmRepository() private salesRepository: SalesRepository,
+        @OrmRepository() private customerServiceRepository: CustomerServiceRepository,
+        @OrmRepository() private fitnessRepository: FitnessRepository
     ) { }
 
     public async parseBasicAuthFromRequest(req: express.Request): Promise<number> {
@@ -81,6 +87,54 @@ export class AuthService {
 
         if (customer) {
             return customer;
+        }
+
+        return undefined;
+    }
+
+    public async validateCustomerService(userId: number): Promise<any> {
+        console.log('customerServiceId' + userId);
+        const customerService = await this.customerServiceRepository.findOne({
+            where: {
+                customerServiceId : userId,
+            },
+        });
+        console.log(customerService);
+
+        if (customerService) {
+            return customerService;
+        }
+
+        return undefined;
+    }
+
+    public async validateSales(userId: number): Promise<any> {
+        console.log('salesId' + userId);
+        const sales = await this.salesRepository.findOne({
+            where: {
+                salesId : userId,
+            },
+        });
+        console.log(sales);
+
+        if (sales) {
+            return sales;
+        }
+
+        return undefined;
+    }
+
+    public async validateFitness(userId: number): Promise<any> {
+        console.log('fitnessId' + userId);
+        const fitness = await this.fitnessRepository.findOne({
+            where: {
+                fitnessId : userId,
+            },
+        });
+        console.log(fitness);
+
+        if (fitness) {
+            return fitness;
         }
 
         return undefined;

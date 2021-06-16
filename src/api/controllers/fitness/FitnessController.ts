@@ -12,33 +12,33 @@ import {
 import { classToPlain } from "class-transformer";
 import jwt from "jsonwebtoken";
 import { MAILService } from "../../../auth/mail.services";
-import { SalesRegisterRequest } from "./requests/SalesRegisterRequest";
-import { SalesLogin } from "./requests/SalesLoginRequest";
-import { SalesOauthLogin } from "./requests/SalesOauthLoginRequest";
+import { FitnessRegisterRequest } from "./requests/FitnessRegisterRequest";
+import { FitnessLogin } from "./requests/FitnessLoginRequest";
+import { FitnessOauthLogin } from "./requests/FitnessOauthLoginRequest";
 import { ChangePassword } from "./requests/changePasswordRequest";
-import { Sales } from "../../models/Sales";
-import { SalesService } from "../../services/SalesService";
-import { SalesEditProfileRequest } from "./requests/SalesEditProfileRequest";
+import { Fitness } from "../../models/Fitness";
+import { FitnessService } from "../../services/FitnessService";
+import { FitnessEditProfileRequest } from "./requests/FitnessEditProfileRequest";
 import { env } from "../../../env";
 import { EmailTemplateService } from "../../services/EmailTemplateService";
 import { ImageService } from "../../services/ImageService";
 import { S3Service } from "../../services/S3Service";
 import { PluginService } from "../../services/PluginService";
 
-@JsonController("/sales")
-export class SalesController {
+@JsonController("/fitness")
+export class FitnessController {
   constructor(
-    private salesService: SalesService,
+    private fitnessService: FitnessService,
     private s3Service: S3Service,
     private imageService: ImageService,
     private emailTemplateService: EmailTemplateService,
     private pluginService: PluginService
   ) {}
 
-  // Sales Register API
+  // Fitness Register API
   /**
-   * @api {post} /api/sales/register register API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/register register API
+   * @apiGroup Fitness User
    * @apiParam (Request body) {String} username username
    * @apiParam (Request body) {String} firstName firstName
    * @apiParam (Request body) {String} lastName lastName
@@ -62,21 +62,21 @@ export class SalesController {
    *      "message": "Thank you for registering with us and please check your email",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/register
+   * @apiSampleRequest /api/fitness/register
    * @apiErrorExample {json} Register error
    * HTTP/1.1 500 Internal Server Error
    */
-  // Sales Register Function
+  // Fitness Register Function
   @Post("/register")
   public async register(
-    @Body({ validate: true }) registerParam: SalesRegisterRequest,
+    @Body({ validate: true }) registerParam: FitnessRegisterRequest,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const newUser = new Sales();
+    const newUser = new Fitness();
     newUser.firstName = registerParam.firstName;
     newUser.lastName = registerParam.lastName;
-    newUser.password = await Sales.hashPassword(registerParam.password);
+    newUser.password = await Fitness.hashPassword(registerParam.password);
     newUser.email = registerParam.email;
     newUser.username = registerParam.username;
     newUser.mobileNumber = registerParam.mobileNumber;
@@ -87,7 +87,7 @@ export class SalesController {
       request.socket.remoteAddress ||
       request.connection.socket.remoteAddress
     ).split(",")[0];
-    const resultUser = await this.salesService.findOne({
+    const resultUser = await this.fitnessService.findOne({
       where: { email: registerParam.email, deleteFlag: 0 },
     });
     if (resultUser) {
@@ -98,7 +98,7 @@ export class SalesController {
       return response.status(400).send(successResponse);
     }
     if (registerParam.password === registerParam.confirmPassword) {
-      const resultData = await this.salesService.create(newUser);
+      const resultData = await this.fitnessService.create(newUser);
       const emailContent = await this.emailTemplateService.findOne(1);
       const message = emailContent.content.replace(
         "{name}",
@@ -137,8 +137,8 @@ export class SalesController {
 
   // Forgot Password API
   /**
-   * @api {post} /api/sales/forgot-password Forgot Password API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/forgot-password Forgot Password API
+   * @apiGroup Fitness User
    * @apiParam (Request body) {String} email email
    * @apiParamExample {json} Input
    * {
@@ -150,7 +150,7 @@ export class SalesController {
    *      "message": "Thank you,Your password send to your mail id please check your email.",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/forgot-password
+   * @apiSampleRequest /api/fitness/forgot-password
    * @apiErrorExample {json} Forgot Password error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -160,7 +160,7 @@ export class SalesController {
     @Body({ validate: true }) forgotparam: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.salesService.findOne({
+    const resultData = await this.fitnessService.findOne({
       where: { email: forgotparam.email, deleteFlag: 0 },
     });
     if (!resultData) {
@@ -171,8 +171,8 @@ export class SalesController {
       return response.status(400).send(errorResponse);
     }
     const tempPassword: any = Math.random().toString().substr(2, 5);
-    resultData.password = await Sales.hashPassword(tempPassword);
-    const updateUserData = await this.salesService.update(
+    resultData.password = await Fitness.hashPassword(tempPassword);
+    const updateUserData = await this.fitnessService.update(
       resultData.id,
       resultData
     );
@@ -206,8 +206,8 @@ export class SalesController {
 
   // Login API
   /**
-   * @api {post} /api/sales/login login API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/login login API
+   * @apiGroup Fitness User
    * @apiParam (Request body) {String} email email
    * @apiParam (Request body) {String} password password
    * @apiParam (Request body) {String} type type
@@ -226,22 +226,22 @@ export class SalesController {
    *      "message": "Successfully login",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/login
+   * @apiSampleRequest /api/fitness/login
    * @apiErrorExample {json} Login error
    * HTTP/1.1 500 Internal Server Error
    */
   // Login Function
   @Post("/login")
   public async login(
-    @Body({ validate: true }) loginParam: SalesLogin,
+    @Body({ validate: true }) loginParam: FitnessLogin,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
     // select:['id','firstName','email','mobileNumber','avatar', 'avatarPath'],
     if (loginParam.type === "normal") {
-      const resultData = await this.salesService.findOne({
+      const resultData = await this.fitnessService.findOne({
         select: [
-          "salesId",
+          "fitnessId",
           "firstName",
           "email",
           "mobileNumber",
@@ -262,13 +262,13 @@ export class SalesController {
       if (resultData.isActive === 0) {
         const errorUserInActiveResponse: any = {
           status: 0,
-          message: "InActive Sales.",
+          message: "InActive Fitness.",
         };
         return response.status(400).send(errorUserInActiveResponse);
       }
-      if (await Sales.comparePassword(resultData, loginParam.password)) {
+      if (await Fitness.comparePassword(resultData, loginParam.password)) {
         // create a token
-        const token = jwt.sign({ id: resultData.salesId }, "123##$$)(***&");
+        const token = jwt.sign({ id: resultData.fitnessId }, "123##$$)(***&");
 
         // const customerActivity = new CustomerActivity();
         // customerActivity.customerId = resultData.id;
@@ -287,11 +287,11 @@ export class SalesController {
         //   request.connection.socket.remoteAddress
         // ).split(",")[0];
         // const savedloginLog = await this.loginLogService.create(loginLog);
-        const sales = await this.salesService.findOne({
+        const fitness = await this.fitnessService.findOne({
           where: { email: loginParam.email, deleteFlag: 0 },
         });
-        // sales.lastLogin = savedloginLog.createdDate;
-        await this.salesService.create(sales);
+        // fitness.lastLogin = savedloginLog.createdDate;
+        await this.fitnessService.create(fitness);
         console.log(loginParam.type);
         const successResponse: any = {
           status: 1,
@@ -359,8 +359,8 @@ export class SalesController {
   }
   // Change Password API
   /**
-   * @api {post} /api/sales/change-password Change Password API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/change-password Change Password API
+   * @apiGroup Fitness User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} oldPassword Old Password
    * @apiParam (Request body) {String} newPassword New Password
@@ -374,28 +374,28 @@ export class SalesController {
    *      "message": "Your password changed successfully",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/change-password
+   * @apiSampleRequest /api/fitness/change-password
    * @apiErrorExample {json} Change Password error
    * HTTP/1.1 500 Internal Server Error
    */
   // Change Password Function
   @Post("/change-password")
-  @Authorized("sales")
+  @Authorized("fitness")
   public async changePassword(
     @Body({ validate: true }) changePasswordParam: ChangePassword,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.salesService.findOne({
-      where: { salesId: request.user.salesId },
+    const resultData = await this.fitnessService.findOne({
+      where: { fitnessId: request.user.fitnessId },
     });
     if (
-      await Sales.comparePassword(
+      await Fitness.comparePassword(
         resultData,
         changePasswordParam.oldPassword
       )
     ) {
-      const val = await Sales.comparePassword(
+      const val = await Fitness.comparePassword(
         resultData,
         changePasswordParam.newPassword
       );
@@ -406,10 +406,10 @@ export class SalesController {
         };
         return response.status(400).send(errResponse);
       }
-      resultData.password = await Sales.hashPassword(
+      resultData.password = await Fitness.hashPassword(
         changePasswordParam.newPassword
       );
-      const updateUserData = await this.salesService.update(
+      const updateUserData = await this.fitnessService.update(
         resultData.fitnessId,
         resultData
       );
@@ -428,10 +428,10 @@ export class SalesController {
     return response.status(400).send(errorResponse);
   }
 
-  // Get Sales Profile API
+  // Get Fitness Profile API
   /**
-   * @api {get} /api/sales/get-profile Get Profile API
-   * @apiGroup Sales User
+   * @api {get} /api/fitness/get-profile Get Profile API
+   * @apiGroup Fitness User
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -440,19 +440,19 @@ export class SalesController {
    *      "status": "1"
    *       "data":{}
    * }
-   * @apiSampleRequest /api/sales/get-profile
+   * @apiSampleRequest /api/fitness/get-profile
    * @apiErrorExample {json} Get Profile error
    * HTTP/1.1 500 Internal Server Error
    */
   // Get Profile Function
   @Get("/get-profile")
-  @Authorized("sales")
+  @Authorized("fitness")
   public async getProfile(
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const resultData = await this.salesService.findOne({
-      where: { salesId: request.user.salesId },
+    const resultData = await this.fitnessService.findOne({
+      where: { fitnessId: request.user.fitnessId },
     });
     const successResponse: any = {
       status: 1,
@@ -462,10 +462,10 @@ export class SalesController {
     return response.status(200).send(successResponse);
   }
 
-  // Sales Edit Profile API
+  // Fitness Edit Profile API
   /**
-   * @api {post} /api/sales/edit-profile Edit Profile API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/edit-profile Edit Profile API
+   * @apiGroup Fitness User
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {String} firstName First Name
    * @apiParam (Request body) {String} middleName Middle Name
@@ -473,7 +473,7 @@ export class SalesController {
    * @apiParam (Request body) {String} password password
    * @apiParam (Request body) {String} email User Email
    * @apiParam (Request body) {Number} mobileNumber User Phone Number (Optional)
-   * @apiParam (Request body) {String} image Sales Image
+   * @apiParam (Request body) {String} image Fitness Image
    * @apiParamExample {json} Input
    * {
    *      "firstName" : "",
@@ -489,25 +489,25 @@ export class SalesController {
    *      "message": "Successfully updated your profile.",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/edit-profile
+   * @apiSampleRequest /api/fitness/edit-profile
    * @apiErrorExample {json} Register error
    * HTTP/1.1 500 Internal Server Error
    */
-  // Sales Profile Edit Function
+  // Fitness Profile Edit Function
   @Post("/edit-profile")
-  @Authorized("sales")
+  @Authorized("fitness")
   public async editProfile(
     @Body({ validate: true })
-    salesEditProfileRequest: SalesEditProfileRequest,
+    fitnessEditProfileRequest: FitnessEditProfileRequest,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    const image = salesEditProfileRequest.image;
+    const image = fitnessEditProfileRequest.image;
     let name;
 
-    const resultData = await this.salesService.findOne({
+    const resultData = await this.fitnessService.findOne({
       select: [
-        "salesId",
+        "fitnessId",
         "firstName",
         "lastName",
         "email",
@@ -517,7 +517,7 @@ export class SalesController {
         "avatarPath",
         "password",
       ],
-      where: { salesId: request.user.salesId },
+      where: { fitnessId: request.user.fitnessId },
     });
     if (image) {
       const base64Data = new Buffer(
@@ -526,7 +526,7 @@ export class SalesController {
       );
       const type = image.split(";")[0].split("/")[1];
       name = "Img_" + Date.now() + "." + type; // path.extname(file.originalname);
-      const path = "sales/";
+      const path = "fitness/";
       let val: any;
       if (env.imageserver === "s3") {
         val = await this.s3Service.imageUpload(path + name, base64Data, type);
@@ -537,20 +537,20 @@ export class SalesController {
       resultData.avatar = name;
       resultData.avatarPath = path;
     }
-    resultData.firstName = salesEditProfileRequest.firstName;
-    resultData.lastName = salesEditProfileRequest.lastName;
-    resultData.email = salesEditProfileRequest.email;
-    resultData.mobileNumber = salesEditProfileRequest.mobileNumber;
-    resultData.mailStatus = salesEditProfileRequest.mailStatus;
-    resultData.address = salesEditProfileRequest.address;
-    resultData.username = salesEditProfileRequest.username;
-    if (salesEditProfileRequest.password) {
-      // if (await Sales.comparePassword(resultData, salesEditProfileRequest.oldPassword)) {
-      resultData.password = await Sales.hashPassword(
-        salesEditProfileRequest.password
+    resultData.firstName = fitnessEditProfileRequest.firstName;
+    resultData.lastName = fitnessEditProfileRequest.lastName;
+    resultData.email = fitnessEditProfileRequest.email;
+    resultData.mobileNumber = fitnessEditProfileRequest.mobileNumber;
+    resultData.mailStatus = fitnessEditProfileRequest.mailStatus;
+    resultData.address = fitnessEditProfileRequest.address;
+    resultData.username = fitnessEditProfileRequest.username;
+    if (fitnessEditProfileRequest.password) {
+      // if (await Fitness.comparePassword(resultData, fitnessEditProfileRequest.oldPassword)) {
+      resultData.password = await Fitness.hashPassword(
+        fitnessEditProfileRequest.password
       );
-      const updateUserData = await this.salesService.update(
-        resultData.salesId,
+      const updateUserData = await this.fitnessService.update(
+        resultData.fitnessId,
         resultData
       );
       if (updateUserData) {
@@ -562,8 +562,8 @@ export class SalesController {
         return response.status(200).send(successResponseResult);
       }
     }
-    const updateuserData = await this.salesService.update(
-      resultData.salesId,
+    const updateuserData = await this.fitnessService.update(
+      resultData.fitnessId,
       resultData
     );
     const successResponse: any = {
@@ -576,8 +576,8 @@ export class SalesController {
 
   // logList API
   /**
-   * @api {get} /api/sales/login-log-list Login Log list API
-   * @apiGroup Sales User
+   * @api {get} /api/fitness/login-log-list Login Log list API
+   * @apiGroup Fitness User
    * @apiParam (Request body) {Number} limit limit
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -585,14 +585,14 @@ export class SalesController {
    *      "message": "Successfully get login log list",
    *      "data":{
    *      "id"
-   *      "salesId"
+   *      "fitnessId"
    *      "emailId"
    *      "firstName"
    *      "ipAddress"
    *      "createdDate"
    *      }
    * }
-   * @apiSampleRequest /api/sales/login-log-list
+   * @apiSampleRequest /api/fitness/login-log-list
    * @apiErrorExample {json} Front error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -623,8 +623,8 @@ export class SalesController {
 
   // Oauth Login API
   /**
-   * @api {post} /api/sales/Oauth-login Oauth login API
-   * @apiGroup Sales User
+   * @api {post} /api/fitness/Oauth-login Oauth login API
+   * @apiGroup Fitness User
    * @apiParam (Request body) {String} emailId User Email Id
    * @apiParam (Request body) {String} source source
    * @apiParam (Request body) {String} oauthData oauthData
@@ -644,25 +644,25 @@ export class SalesController {
    *      "message": "Successfully login",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/sales/Oauth-login
+   * @apiSampleRequest /api/fitness/Oauth-login
    * @apiErrorExample {json} Login error
    * HTTP/1.1 500 Internal Server Error
    */
   // Login Function
   @Post("/Oauth-login")
   public async OauthLogin(
-    @Body({ validate: true }) loginParam: SalesOauthLogin,
+    @Body({ validate: true }) loginParam: FitnessOauthLogin,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
     console.log(loginParam.emailId);
-    const resultData = await this.salesService.findOne({
+    const resultData = await this.fitnessService.findOne({
       where: { email: loginParam.emailId },
     });
     if (!resultData) {
-      const newUser = new Sales();
+      const newUser = new Fitness();
       const tempPassword: any = Math.random().toString().substr(2, 5);
-      newUser.password = await Sales.hashPassword(tempPassword);
+      newUser.password = await Fitness.hashPassword(tempPassword);
       newUser.email = loginParam.emailId;
       newUser.username = loginParam.emailId;
       newUser.isActive = 1;
@@ -672,21 +672,21 @@ export class SalesController {
         request.socket.remoteAddress ||
         request.connection.socket.remoteAddress
       ).split(",")[0];
-      const newSales = await this.salesService.create(newUser);
+      const newFitness = await this.fitnessService.create(newUser);
       // create a token
-      const token = jwt.sign({ id: newSales.id }, "123##$$)(***&", {
+      const token = jwt.sign({ id: newFitness.id }, "123##$$)(***&", {
         expiresIn: 86400, // expires in 24 hours
       });
       const emailContent = await this.emailTemplateService.findOne(1);
       const message = emailContent.content.replace(
         "{name}",
-        newSales.username
+        newFitness.username
       );
       const redirectUrl = "google.com";
       // const redirectUrl = env.storeRedirectUrl;
       const sendMailRes = MAILService.registerMail(
         message,
-        newSales.email,
+        newFitness.email,
         emailContent.subject,
         redirectUrl
       );
