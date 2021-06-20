@@ -63,6 +63,13 @@ export class BranchController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const brand = await this.brandService.findOne({
       where: { brandId: createParam.brandId },
     });
@@ -139,6 +146,13 @@ export class BranchController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const branch = await this.branchService.findOne({
       where: {
         branchId,
@@ -283,6 +297,13 @@ export class BranchController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const branch = await this.branchService.findOne({
       where: {
         branchId,

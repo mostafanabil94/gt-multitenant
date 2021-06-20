@@ -54,8 +54,16 @@ export class BrandMembershipController {
   @Authorized()
   public async createBrandMembership(
     @Body({ validate: true }) createBrandMembershipParam: CreateBrandMembershipRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const newBrandMembership: any = new BrandMembership();
     newBrandMembership.brandId = createBrandMembershipParam.brandId;
     newBrandMembership.membershipId = createBrandMembershipParam.membershipId;
@@ -106,8 +114,16 @@ export class BrandMembershipController {
   public async updateBrandMembership(
     @Param("id") id: number,
     @Body({ validate: true }) createBrandMembershipParam: CreateBrandMembershipRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const brandMembership = await this.brandMembershipService.findOne({
       where: {
         brandMembershipId: id,
@@ -247,6 +263,13 @@ export class BrandMembershipController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const brandMembershipId = await this.brandMembershipService.findOne({
       where: {
         brandMembershipId: id,

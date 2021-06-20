@@ -33,37 +33,7 @@ export function authorizationChecker(connection: Connection): (action: Action, r
             log.info('Successfully checked credentials');
             return true;
 
-        } else if (roles[0] === 'sales') {
-            action.request.user = await authService.validateSales(userId);
-            if (action.request.user === undefined) {
-                log.warn('Invalid credentials given');
-                return false;
-            }
-
-            log.info('Successfully checked credentials');
-            return true;
-
-        } else if (roles[0] === 'fitness') {
-            action.request.user = await authService.validateFitness(userId);
-            if (action.request.user === undefined) {
-                log.warn('Invalid credentials given');
-                return false;
-            }
-
-            log.info('Successfully checked credentials');
-            return true;
-
-        } else if (roles[0] === 'customer-service') {
-            action.request.user = await authService.validateCustomerService(userId);
-            if (action.request.user === undefined) {
-                log.warn('Invalid credentials given');
-                return false;
-            }
-
-            log.info('Successfully checked credentials');
-            return true;
         } else {
-
             action.request.user = await authService.validateUser(userId);
             if (action.request.user === undefined) {
                 log.warn('Invalid credentials given');

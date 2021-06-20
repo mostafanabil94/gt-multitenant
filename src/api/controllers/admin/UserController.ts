@@ -81,7 +81,10 @@ export class UserController {
     if (user) {
       if (await User.comparePassword(user, loginParam.password)) {
         // create a token
-        const token = jwt.sign({ id: user.userId }, "123##$$)(***&");
+        const role = await this.userGroupService.findOne({
+          where: { groupId: user.userGroupId },
+        });
+        const token = jwt.sign({ id: user.userId, role: role.name }, "123##$$)(***&");
         if (user.usergroup.isActive === 0) {
           const errorResponse: any = {
             status: 0,
@@ -239,8 +242,16 @@ export class UserController {
   @Authorized()
   public async createUser(
     @Body({ validate: true }) createParam: CreateRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createParam);
     const userGroupExistWhereCondition = [
       {
@@ -350,6 +361,13 @@ export class UserController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createParam);
     if (request.user.userId === id) {
       const errorResponse: any = {
@@ -429,6 +447,13 @@ export class UserController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(request.user.userId);
     if (request.user.userId === id) {
       const errorResponse: any = {

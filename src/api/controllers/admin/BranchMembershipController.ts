@@ -54,8 +54,16 @@ export class BranchMembershipController {
   @Authorized()
   public async createBranchMembership(
     @Body({ validate: true }) createBranchMembershipParam: CreateBranchMembershipRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const newBranchMembership: any = new BranchMembership();
     newBranchMembership.branchId = createBranchMembershipParam.branchId;
     newBranchMembership.membershipId = createBranchMembershipParam.membershipId;
@@ -106,8 +114,16 @@ export class BranchMembershipController {
   public async updateBranchMembership(
     @Param("id") id: number,
     @Body({ validate: true }) createBranchMembershipParam: CreateBranchMembershipRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const branchMembership = await this.branchMembershipService.findOne({
       where: {
         branchMembershipId: id,
@@ -247,6 +263,13 @@ export class BranchMembershipController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const branchMembershipId = await this.branchMembershipService.findOne({
       where: {
         branchMembershipId: id,

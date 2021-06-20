@@ -52,8 +52,16 @@ export class RoomController {
   @Authorized()
   public async createRoom(
     @Body({ validate: true }) createRoomParam: CreateRoomRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const newRoom: any = new Room();
     newRoom.branchId = createRoomParam.branchId;
     newRoom.name = createRoomParam.name;
@@ -104,8 +112,16 @@ export class RoomController {
   public async updateRoom(
     @Param("id") id: number,
     @Body({ validate: true }) createRoomParam: CreateRoomRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const room = await this.roomService.findOne({
       where: {
         roomId: id,
@@ -244,6 +260,13 @@ export class RoomController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const roomId = await this.roomService.findOne({
       where: {
         roomId: id,

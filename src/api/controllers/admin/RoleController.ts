@@ -51,8 +51,16 @@ export class RoleController {
   @Authorized()
   public async createRole(
     @Body({ validate: true }) createRoleParam: CreateRoleRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createRoleParam);
     const role = await this.userGroupService.findOne({
       where: {
@@ -118,8 +126,16 @@ export class RoleController {
   public async updateRole(
     @Param("id") id: number,
     @Body({ validate: true }) createRoleParam: CreateRoleRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createRoleParam);
     const role = await this.userGroupService.findOne({
       where: {
@@ -245,6 +261,13 @@ export class RoleController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const roleId = await this.userGroupService.findOne({
       where: {
         groupId: role.groupId,

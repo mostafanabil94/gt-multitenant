@@ -1,6 +1,7 @@
-import {Column, Entity, BeforeInsert, BeforeUpdate, PrimaryGeneratedColumn} from 'typeorm';
+import {Column, Entity, BeforeInsert, BeforeUpdate, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
 import {BaseModel} from './BaseModel';
 import moment = require('moment/moment');
+import { BranchTax } from './BranchTax';
 
 @Entity('tax')
 export class Tax extends BaseModel {
@@ -16,6 +17,12 @@ export class Tax extends BaseModel {
 
     @Column({name: 'tax_status'})
     public taxStatus: number;
+
+    @OneToMany(
+        (type) => BranchTax,
+        (branchTax) => branchTax.tax
+      )
+      public branchTax: BranchTax[];
 
     @BeforeInsert()
     public async createDetails(): Promise<void> {

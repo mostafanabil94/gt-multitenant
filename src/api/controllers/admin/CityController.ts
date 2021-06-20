@@ -2,7 +2,6 @@ import "reflect-metadata";
 import {
   Get,
   JsonController,
-  Authorized,
   Res,
   QueryParam,
 } from "routing-controllers";
@@ -38,7 +37,6 @@ export class CityController {
    * HTTP/1.1 500 Internal Server Error
    */
   @Get("/city-list")
-  @Authorized()
   public async citylist(
     @QueryParam("limit") limit: number,
     @QueryParam("offset") offset: number,

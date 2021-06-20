@@ -15,6 +15,8 @@ import { Exclude } from "class-transformer";
 import { Country } from "./Country";
 import { CustomerDocument } from "./CustomerDocument";
 import { CustomerGroup } from "./CustomerGroup";
+import { BranchCustomer } from "./BranchCustomer";
+import { ClientMembershipPlan } from "./ClientMembershipPlan";
 
 @Entity("customer")
 export class Customer extends BaseModel {
@@ -133,6 +135,15 @@ export class Customer extends BaseModel {
     (customerDocument) => customerDocument.customer
   )
   public customerDocument: CustomerDocument[];
+
+  @OneToMany((type) => ClientMembershipPlan, (clientMembershipPlan) => clientMembershipPlan.customer)
+  public clientMembershipPlan: ClientMembershipPlan[];
+
+  @OneToMany(
+    (type) => BranchCustomer,
+    (branchCustomer) => branchCustomer.customer
+  )
+  public branchCustomer: BranchCustomer[];
 
   @BeforeInsert()
   public async createDetails(): Promise<void> {

@@ -2,7 +2,6 @@ import "reflect-metadata";
 import {
   Get,
   JsonController,
-  Authorized,
   Res,
   QueryParam,
 } from "routing-controllers";
@@ -43,7 +42,6 @@ export class CountryController {
    * HTTP/1.1 500 Internal Server Error
    */
   @Get("/country-list")
-  @Authorized()
   public async countryList(
     @QueryParam("limit") limit: number,
     @QueryParam("offset") offset: number,

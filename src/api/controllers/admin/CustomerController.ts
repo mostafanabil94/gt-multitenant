@@ -26,16 +26,18 @@ import { UpdateCustomer } from "./requests/UpdateCustomerRequest";
 import { DeleteCustomerRequest } from "./requests/DeleteCustomerRequest";
 import * as fs from "fs";
 
-@JsonController("/admin-customer")
+@JsonController("/user-customer")
 export class CustomerController {
   constructor(private customerService: CustomerService) {}
 
   // Create Customer API
   /**
-   * @api {post} /api/admin-customer/add-customer Add Customer API
-   * @apiGroup Admin Customer
+   * @api {post} /api/user-customer/add-customer Add Customer API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {Number} customerGroupId Customer customerGroupId
+   * @apiParam (Request body) {String} firstName Customer firstName
+   * @apiParam (Request body) {String} lastName Customer lastName
    * @apiParam (Request body) {String} username Customer username
    * @apiParam (Request body) {String} email Customer email
    * @apiParam (Request body) {Number} mobileNumber Customer mobileNumber
@@ -47,7 +49,9 @@ export class CustomerController {
    * @apiParamExample {json} Input
    * {
    *      "customerGroupId" : "",
-   *      "userName" : "",
+   *      "firstName" : "",
+   *      "lastName" : "",
+   *      "username" : "",
    *      "email" : "",
    *      "mobileNumber" : "",
    *      "password" : "",
@@ -62,7 +66,7 @@ export class CustomerController {
    *      "message": "Customer Created successfully",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/add-customer
+   * @apiSampleRequest /api/user-customer/add-customer
    * @apiErrorExample {json} Customer error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -70,8 +74,16 @@ export class CustomerController {
   @Authorized()
   public async addCustomer(
     @Body({ validate: true }) customerParam: CreateCustomer,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const avatar = customerParam.avatar;
     const newCustomer: any = new Customer();
     const resultUser = await this.customerService.findOne({
@@ -115,8 +127,9 @@ export class CustomerController {
     if (customerParam.password === customerParam.confirmPassword) {
       const password = await User.hashPassword(customerParam.password);
       newCustomer.customerGroupId = customerParam.customerGroupId;
-      newCustomer.firstName = customerParam.username;
-      newCustomer.username = customerParam.email;
+      newCustomer.firstName = customerParam.firstName;
+      newCustomer.lastName = customerParam.lastName;
+      newCustomer.username = customerParam.username;
       newCustomer.email = customerParam.email;
       newCustomer.mobileNumber = customerParam.mobileNumber;
       newCustomer.password = password;
@@ -158,8 +171,8 @@ export class CustomerController {
 
   // Customer List API
   /**
-   * @api {get} /api/admin-customer/customerlist Customer List API
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/customerlist Customer List API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {Number} limit limit
    * @apiParam (Request body) {Number} offset offset
@@ -186,7 +199,7 @@ export class CustomerController {
    *      }
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/customerlist
+   * @apiSampleRequest /api/user-customer/customerlist
    * @apiErrorExample {json} customer error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -268,8 +281,8 @@ export class CustomerController {
 
   // Delete Customer API
   /**
-   * @api {delete} /api/admin-customer/delete-customer/:id Delete Customer API
-   * @apiGroup Admin Customer
+   * @api {delete} /api/user-customer/delete-customer/:id Delete Customer API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiParamExample {json} Input
    * {
@@ -281,7 +294,7 @@ export class CustomerController {
    *      "message": "Successfully deleted customer.",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/delete-customer/:id
+   * @apiSampleRequest /api/user-customer/delete-customer/:id
    * @apiErrorExample {json} Customer error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -292,6 +305,13 @@ export class CustomerController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const customer = await this.customerService.findOne({
       where: {
         id,
@@ -323,10 +343,12 @@ export class CustomerController {
 
   // Update Customer API
   /**
-   * @api {put} /api/admin-customer/update-customer/:id Update Customer API
-   * @apiGroup Admin Customer
+   * @api {put} /api/user-customer/update-customer/:id Update Customer API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiParam (Request body) {Number} customerGroupId Customer customerGroupId
+   * @apiParam (Request body) {String} firstName Customer firstName
+   * @apiParam (Request body) {String} lastName Customer lastName
    * @apiParam (Request body) {String} username Customer username
    * @apiParam (Request body) {String} email Customer email
    * @apiParam (Request body) {Number} mobileNumber Customer mobileNumber
@@ -338,7 +360,9 @@ export class CustomerController {
    * @apiParamExample {json} Input
    * {
    *      "customerGroupId" : "",
-   *      "userName" : "",
+   *      "firstName" : "",
+   *      "lastName" : "",
+   *      "username" : "",
    *      "email" : "",
    *      "mobileNumber" : "",
    *      "password" : "",
@@ -353,7 +377,7 @@ export class CustomerController {
    *      "message": " Customer is updated successfully",
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/update-customer/:id
+   * @apiSampleRequest /api/user-customer/update-customer/:id
    * @apiErrorExample {json} updateCustomer error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -362,8 +386,16 @@ export class CustomerController {
   public async updateCustomer(
     @Param("id") id: number,
     @Body({ validate: true }) customerParam: UpdateCustomer,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(customerParam);
     const customer = await this.customerService.findOne({
       where: {
@@ -409,8 +441,9 @@ export class CustomerController {
       }
       // const password = await User.hashPassword(customerParam.password);
       customer.customerGroupId = customerParam.customerGroupId;
-      customer.firstName = customerParam.username;
-      customer.username = customerParam.email;
+      customer.firstName = customerParam.firstName;
+      customer.lastName = customerParam.lastName;
+      customer.username = customerParam.username;
       customer.email = customerParam.email;
       customer.mobileNumber = customerParam.mobileNumber;
       if (customerParam.password) {
@@ -439,8 +472,8 @@ export class CustomerController {
 
   // Get Customer Detail API
   /**
-   * @api {get} /api/admin-customer/customer-details/:id Customer Details API
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/customer-details/:id Customer Details API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -460,7 +493,7 @@ export class CustomerController {
    * }
    * "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/customer-details/:id
+   * @apiSampleRequest /api/user-customer/customer-details/:id
    * @apiErrorExample {json} customer error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -468,8 +501,16 @@ export class CustomerController {
   @Authorized()
   public async customerDetails(
     @Param("id") Id: number,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const customer = await this.customerService.findOne({
       select: [
         "id",
@@ -502,8 +543,8 @@ export class CustomerController {
 
   // Recently Added Customer List API
   /**
-   * @api {get} /api/admin-customer/recent-customerlist Recent Customer List API
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/recent-customerlist Recent Customer List API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -517,13 +558,20 @@ export class CustomerController {
    *      "isActive" : "",
    *      }
    * }
-   * @apiSampleRequest /api/admin-customer/recent-customerlist
+   * @apiSampleRequest /api/user-customer/recent-customerlist
    * @apiErrorExample {json} customer error
    * HTTP/1.1 500 Internal Server Error
    */
   @Get("/recent-customerlist")
   @Authorized()
-  public async recentCustomerList(@Res() response: any): Promise<any> {
+  public async recentCustomerList(@Req() request: any, @Res() response: any): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const order = 1;
     const WhereConditions = [
       {
@@ -550,8 +598,8 @@ export class CustomerController {
 
   //  Today Customer Count API
   /**
-   * @api {get} /api/admin-customer/today-customercount Today Customer Count API
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/today-customercount Today Customer Count API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -561,13 +609,20 @@ export class CustomerController {
    *      }
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/today-customercount
+   * @apiSampleRequest /api/user-customer/today-customercount
    * @apiErrorExample {json} order error
    * HTTP/1.1 500 Internal Server Error
    */
   @Get("/today-customercount")
   @Authorized()
-  public async customerCount(@Res() response: any): Promise<any> {
+  public async customerCount(@Req() request: any, @Res() response: any): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const nowDate = new Date();
     const todaydate =
       nowDate.getFullYear() +
@@ -588,10 +643,10 @@ export class CustomerController {
 
   // Delete Multiple Customer API
   /**
-   * @api {post} /api/admin-customer/delete-customer Delete Multiple Customer API
-   * @apiGroup Admin Customer
+   * @api {post} /api/user-customer/delete-customer Delete Multiple Customer API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
-   * @apiParam (Request body) {number} customerId customerId
+   * @apiParam (Request body) {array} customerId customerId
    * @apiParamExample {json} Input
    * {
    * "customerId" : "",
@@ -602,7 +657,7 @@ export class CustomerController {
    * "message": "Successfully deleted customer.",
    * "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/delete-customer
+   * @apiSampleRequest /api/user-customer/delete-customer
    * @apiErrorExample {json} customerDelete error
    * HTTP/1.1 500 Internal Server Error
    */
@@ -613,6 +668,13 @@ export class CustomerController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const customers = deleteCustomerId.customerId.toString();
     const customer: any = customers.split(",");
     console.log(customer);
@@ -641,8 +703,8 @@ export class CustomerController {
 
   // Customer Details Excel Document Download
   /**
-   * @api {get} /api/admin-customer/customer-excel-list Customer Excel
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/customer-excel-list Customer Excel
+   * @apiGroup User Customer
    * @apiParam (Request body) {String} customerId customerId
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -651,17 +713,25 @@ export class CustomerController {
    *      "status": "1",
    *      "data": {},
    * }
-   * @apiSampleRequest /api/admin-customer/customer-excel-list
+   * @apiSampleRequest /api/user-customer/customer-excel-list
    * @apiErrorExample {json} Customer Excel List error
    * HTTP/1.1 500 Internal Server Error
    */
 
   @Get("/customer-excel-list")
+  @Authorized()
   public async excelCustomerView(
     @QueryParam("customerId") customerId: string,
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const excel = require("exceljs");
     const workbook = new excel.Workbook();
     const worksheet = workbook.addWorksheet("Customer Export sheet");
@@ -759,8 +829,8 @@ export class CustomerController {
 
   // Customer Details Excel Document Download
   /**
-   * @api {get} /api/admin-customer/allcustomer-excel-list All Customer Excel
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/allcustomer-excel-list All Customer Excel
+   * @apiGroup User Customer
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
    * {
@@ -768,16 +838,24 @@ export class CustomerController {
    *      "status": "1",
    *      "data": {},
    * }
-   * @apiSampleRequest /api/admin-customer/allcustomer-excel-list
+   * @apiSampleRequest /api/user-customer/allcustomer-excel-list
    * @apiErrorExample {json} All Customer Excel List error
    * HTTP/1.1 500 Internal Server Error
    */
 
   @Get("/allcustomer-excel-list")
+  @Authorized()
   public async AllCustomerExcel(
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const excel = require("exceljs");
     const workbook = new excel.Workbook();
     const worksheet = workbook.addWorksheet("Bulk Customer Export");
@@ -872,8 +950,8 @@ export class CustomerController {
 
   // Customer Count API
   /**
-   * @api {get} /api/admin-customer/customer-count Customer Count API
-   * @apiGroup Admin Customer
+   * @api {get} /api/user-customer/customer-count Customer Count API
+   * @apiGroup User Customer
    * @apiHeader {String} Authorization
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -882,13 +960,20 @@ export class CustomerController {
    *      "data":{},
    *      "status": "1"
    * }
-   * @apiSampleRequest /api/admin-customer/customer-count
+   * @apiSampleRequest /api/user-customer/customer-count
    * @apiErrorExample {json} customer error
    * HTTP/1.1 500 Internal Server Error
    */
   @Get("/customer-count")
   @Authorized()
-  public async customerCounts(@Res() response: any): Promise<any> {
+  public async customerCounts(@Req() request: any, @Res() response: any): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const customer: any = {};
     const search = [];
     const WhereConditions = [];

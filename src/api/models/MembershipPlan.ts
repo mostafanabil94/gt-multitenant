@@ -1,7 +1,8 @@
-import { Column, Entity, BeforeInsert, BeforeUpdate , PrimaryGeneratedColumn, ManyToOne, JoinColumn} from 'typeorm';
+import { Column, Entity, BeforeInsert, BeforeUpdate , PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany} from 'typeorm';
 import {BaseModel} from './BaseModel';
 import moment = require('moment/moment');
 import { Membership } from './Membership';
+import { ClientMembershipPlan } from './ClientMembershipPlan';
 @Entity('membership_plan')
 export class MembershipPlan extends BaseModel {
 
@@ -71,6 +72,9 @@ export class MembershipPlan extends BaseModel {
     @ManyToOne((type) => Membership, (membership) => membership.membershipPlan)
     @JoinColumn({ name: "membership_id" })
     public membership: Membership;
+
+    @OneToMany((type) => ClientMembershipPlan, (clientMembershipPlan) => clientMembershipPlan.membershipPlan)
+    public clientMembershipPlan: ClientMembershipPlan[];
 
     @BeforeInsert()
     public async createDetails(): Promise<void> {

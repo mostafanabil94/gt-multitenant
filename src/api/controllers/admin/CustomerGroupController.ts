@@ -55,8 +55,16 @@ export class CustomerGroupController {
   @Authorized()
   public async createCustomerGroup(
     @Body({ validate: true }) createCustomerGroup: CreateCustomerGroup,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createCustomerGroup);
     const customer = await this.customerGroupService.findOne({
       where: {
@@ -127,8 +135,16 @@ export class CustomerGroupController {
   public async updateCustomerRole(
     @Param("id") id: number,
     @Body({ validate: true }) createRoleParam: CreateCustomerGroup,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createRoleParam);
     const customer = await this.customerGroupService.findOne({
       where: {
@@ -256,6 +272,13 @@ export class CustomerGroupController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(group.groupId + "groupId");
     const groupId = await this.customerGroupService.findOne({
       where: {

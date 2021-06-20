@@ -79,8 +79,16 @@ export class MembershipPlanController {
   public async createMembershipPlan(
     @Body({ validate: true })
     createMembershipPlanParam: CreateMembershipPlanRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createMembershipPlanParam);
     const membershipPlan = await this.membershipPlanService.findOne({
       where: {
@@ -201,8 +209,16 @@ export class MembershipPlanController {
     @Param("id") id: number,
     @Body({ validate: true })
     createMembershipPlanParam: CreateMembershipPlanRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     console.log(createMembershipPlanParam);
     const membershipPlan = await this.membershipPlanService.findOne({
       where: {
@@ -424,6 +440,13 @@ export class MembershipPlanController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const membershipPlanId = await this.membershipPlanService.findOne({
       where: {
         membershipPlanId: id,

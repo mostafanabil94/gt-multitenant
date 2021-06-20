@@ -11,12 +11,12 @@ import {
 import { BaseModel } from "./BaseModel";
 import moment = require("moment/moment");
 import { Brand } from "./Brand";
-import { BranchAdmin } from "./BranchAdmin";
+import { BranchUser } from "./BranchUser";
 import { Room } from "./Room";
-import { BranchFitness } from "./BranchFitness";
-import { BranchSales } from "./BranchSales";
-import { BranchCustomerService } from "./BranchCustomerService";
 import { BranchMembership } from "./BranchMembership";
+import { BranchTax } from "./BranchTax";
+import { BranchCurrency } from "./BranchCurrency";
+import { BranchCustomer } from "./BranchCustomer";
 
 @Entity("branch")
 export class Branch extends BaseModel {
@@ -63,20 +63,20 @@ export class Branch extends BaseModel {
   @JoinColumn({ name: "brand_id" })
   public brand: Brand;
 
-  @OneToMany((type) => BranchAdmin, (branchAdmin) => branchAdmin.branch)
-  public branchAdmin: BranchAdmin[];
-
-  @OneToMany((type) => BranchFitness, (branchFitness) => branchFitness.branch)
-  public branchFitness: BranchFitness[];
-
-  @OneToMany((type) => BranchSales, (branchSales) => branchSales.branch)
-  public branchSales: BranchSales[];
-
-  @OneToMany((type) => BranchCustomerService, (branchCustomerService) => branchCustomerService.branch)
-  public branchCustomerService: BranchCustomerService[];
+  @OneToMany((type) => BranchUser, (branchUser) => branchUser.branch)
+  public branchUser: BranchUser[];
 
   @OneToMany((type) => BranchMembership, (branchMembership) => branchMembership.branch)
   public branchMembership: BranchMembership[];
+
+  @OneToMany((type) => BranchTax, (branchTax) => branchTax.branch)
+  public branchTax: BranchTax[];
+
+  @OneToMany((type) => BranchCurrency, (branchCurrency) => branchCurrency.branch)
+  public branchCurrency: BranchCurrency[];
+
+  @OneToMany((type) => BranchCustomer, (branchCustomer) => branchCustomer.branch)
+  public branchCustomer: BranchCustomer[];
 
   @OneToMany((type) => Room, (room) => room.branch)
   public room: Room[];

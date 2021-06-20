@@ -53,8 +53,16 @@ export class CurrencyController {
   @Authorized()
   public async addCurrency(
     @Body({ validate: true }) currencyParameter: CreateCurrency,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const newCurrency = new Currency();
     newCurrency.title = currencyParameter.title;
     newCurrency.code = currencyParameter.code;
@@ -203,8 +211,16 @@ export class CurrencyController {
   public async updateCurrency(
     @Param("id") id: number,
     @Body({ validate: true }) currencyParam: UpdateCurrency,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const currency = await this.currencyService.findOne({
       where: {
         currencyId: id,
@@ -271,6 +287,13 @@ export class CurrencyController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const currency = await this.currencyService.findOne({
       where: {
         currencyId: id,

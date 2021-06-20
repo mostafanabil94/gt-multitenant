@@ -9,7 +9,7 @@
 // import {Currency} from '../../api/models/Currency';
 // import {User} from '../../api/models/User';
 // import {MAILService} from '../../auth/mail.services';
-// import {env} from '../../env';/
+// import {env} from '../../env';
 // import moment = require('moment');
 
 // export class StripeController {

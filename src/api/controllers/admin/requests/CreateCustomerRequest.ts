@@ -8,6 +8,12 @@ export class CreateCustomer {
     @IsNotEmpty()
     public username: string;
 
+    @IsNotEmpty()
+    public firstName: string;
+
+    @IsNotEmpty()
+    public lastName: string;
+
     @IsEmail()
     public email: string;
 

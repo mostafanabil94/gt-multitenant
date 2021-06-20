@@ -9,7 +9,7 @@ import {
 import { BaseModel } from "./BaseModel";
 import moment = require("moment/moment");
 import { Branch } from "./Branch";
-import { BrandAdmin } from "./BrandAdmin";
+import { BrandUser } from "./BrandUser";
 import { BrandMembership } from "./BrandMembership";
 
 @Entity("brand")
@@ -53,8 +53,8 @@ export class Brand extends BaseModel {
   @OneToMany((type) => Branch, (branch) => branch.brand)
   public branch: Branch[];
 
-  @OneToMany((type) => BrandAdmin, (brandAdmin) => brandAdmin.brand)
-  public brandAdmin: BrandAdmin[];
+  @OneToMany((type) => BrandUser, (brandUser) => brandUser.brand)
+  public brandUser: BrandUser[];
 
   @OneToMany((type) => BrandMembership, (brandMembership) => brandMembership.brand)
   public brandMembership: BrandMembership[];

@@ -1,7 +1,8 @@
-import {BeforeInsert, BeforeUpdate, Column, Entity} from 'typeorm';
+import {BeforeInsert, BeforeUpdate, Column, Entity, OneToMany} from 'typeorm';
 import {PrimaryGeneratedColumn} from 'typeorm/index';
 import {BaseModel} from './BaseModel';
 import moment = require('moment');
+import { BranchCurrency } from './BranchCurrency';
 @Entity('currency')
 export class Currency extends BaseModel {
 
@@ -25,6 +26,12 @@ export class Currency extends BaseModel {
 
     @Column({ name: 'is_active' })
     public isActive: number;
+
+    @OneToMany(
+        (type) => BranchCurrency,
+        (branchCurrency) => branchCurrency.currency
+      )
+      public branchCurrency: BranchCurrency[];
 
     @BeforeInsert()
     public async createDetails(): Promise<void> {

@@ -48,8 +48,16 @@ export class TaxController {
   @Authorized()
   public async addTax(
     @Body({ validate: true }) createParam: CreateTaxRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const newTax = new Tax();
     newTax.taxName = createParam.taxName;
     newTax.taxPercentage = createParam.taxPercentage;
@@ -100,8 +108,16 @@ export class TaxController {
   public async updateTax(
     @Param("taxId") taxId: number,
     @Body({ validate: true }) updateParam: CreateTaxRequest,
+    @Req() request: any,
     @Res() response: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const tax = await this.taxService.findOne({
       where: {
         taxId,
@@ -217,6 +233,13 @@ export class TaxController {
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin and Admin has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
     const tax = await this.taxService.findOne({
       where: {
         taxId,

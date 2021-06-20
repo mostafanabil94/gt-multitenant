@@ -15,8 +15,9 @@ import { UserGroup } from "./UserGroup";
 import { BaseModel } from "./BaseModel";
 import moment from "moment";
 import { AccessToken } from "./AccessTokenModel";
-import { BrandAdmin } from "./BrandAdmin";
-import { BranchAdmin } from "./BranchAdmin";
+import { BrandUser } from "./BrandUser";
+import { BranchUser } from "./BranchUser";
+import { ClientMembershipPlan } from "./ClientMembershipPlan";
 
 @Entity("users")
 export class User extends BaseModel {
@@ -102,11 +103,14 @@ export class User extends BaseModel {
   @OneToMany((type) => AccessToken, (accessToken) => accessToken.user)
   public accessToken: AccessToken[];
 
-  @OneToMany((type) => BrandAdmin, (brandAdmin) => brandAdmin.user)
-  public brandAdmin: BrandAdmin[];
+  @OneToMany((type) => BrandUser, (brandUser) => brandUser.user)
+  public brandUser: BrandUser[];
 
-  @OneToMany((type) => BranchAdmin, (branchAdmin) => branchAdmin.user)
-  public branchAdmin: BranchAdmin[];
+  @OneToMany((type) => BranchUser, (branchUser) => branchUser.user)
+  public branchUser: BranchUser[];
+
+  @OneToMany((type) => ClientMembershipPlan, (clientMembershipPlan) => clientMembershipPlan.sales)
+  public clientMembershipPlan: ClientMembershipPlan[];
 
   @BeforeInsert()
   public async hashPassword(): Promise<void> {
