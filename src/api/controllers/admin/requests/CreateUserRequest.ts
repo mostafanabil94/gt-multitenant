@@ -46,6 +46,8 @@ export class CreateUser {
     })
     public email: string;
 
+    public avatar: string;
+
     @IsNotEmpty({
         message: 'User Group Id is required',
     })

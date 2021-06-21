@@ -12,10 +12,8 @@ import {
   Req,
   Res,
 } from "routing-controllers";
-import * as AWS from "aws-sdk";
 import { classToPlain } from "class-transformer";
-// import {aws_setup, env} from '../../env';
-import { aws_setup } from "../../../env";
+import {env} from '../../../env';
 import { CustomerService } from "../../services/CustomerService";
 import { Customer } from "../../models/Customer";
 import { CreateCustomer } from "./requests/CreateCustomerRequest";
@@ -25,10 +23,14 @@ import { UpdateCustomer } from "./requests/UpdateCustomerRequest";
 // import {EmailTemplateService} from '../services/EmailTemplateService';
 import { DeleteCustomerRequest } from "./requests/DeleteCustomerRequest";
 import * as fs from "fs";
+import { S3Service } from "../../services/S3Service";
+import { ImageService } from "../../services/ImageService";
 
 @JsonController("/user-customer")
 export class CustomerController {
-  constructor(private customerService: CustomerService) {}
+  constructor(private customerService: CustomerService,
+              private s3Service: S3Service,
+              private imageService: ImageService) {}
 
   // Create Customer API
   /**
@@ -97,32 +99,17 @@ export class CustomerController {
       return response.status(400).send(successResponse);
     }
     if (avatar) {
-      const type = avatar.split(";")[0].split("/")[1];
-      const name = "Img_" + Date.now() + "." + type;
-      const s3 = new AWS.S3();
-      const path = "customer/";
-      const base64Data = new Buffer(
-        avatar.replace(/^data:image\/\w+;base64,/, ""),
-        "base64"
-      );
-      const params = {
-        Bucket: aws_setup.AWS_BUCKET,
-        Key: "customer/" + name,
-        Body: base64Data,
-        ACL: "public-read",
-        ContentEncoding: "base64",
-        ContentType: `image/${type}`,
-      };
+      const type = avatar.split(';')[0].split('/')[1];
+      const name = 'Img_' + Date.now() + '.' + type;
+      const path = 'customers/';
+      const base64Data = Buffer.from(avatar.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      if (env.imageserver === 's3') {
+          await this.s3Service.imageUpload((path + name), base64Data, type);
+      } else {
+          await this.imageService.imageUpload((path + name), base64Data);
+      }
       newCustomer.avatar = name;
       newCustomer.avatarPath = path;
-      s3.upload(params, (err, data) => {
-        if (data) {
-          console.log("image upload successfully");
-          console.log(data);
-        } else {
-          console.log("error while uploading image");
-        }
-      });
     }
     if (customerParam.password === customerParam.confirmPassword) {
       const password = await User.hashPassword(customerParam.password);
@@ -412,30 +399,15 @@ export class CustomerController {
     if (customerParam.password === customerParam.confirmPassword) {
       const avatar = customerParam.avatar;
       if (avatar) {
-        const type = avatar.split(";")[0].split("/")[1];
-        const name = "Img_" + Date.now() + "." + type;
-        const s3 = new AWS.S3();
-        const path = "customer/";
-        const base64Data = new Buffer(
-          avatar.replace(/^data:image\/\w+;base64,/, ""),
-          "base64"
-        );
-        const params = {
-          Bucket: aws_setup.AWS_BUCKET,
-          Key: "customer/" + name,
-          Body: base64Data,
-          ACL: "public-read",
-          ContentEncoding: "base64",
-          ContentType: `image/${type}`,
-        };
-        s3.upload(params, (err, data) => {
-          if (data) {
-            console.log("image upload successfully");
-            console.log(data);
-          } else {
-            console.log("error while uploading image");
-          }
-        });
+        const type = avatar.split(';')[0].split('/')[1];
+        const name = 'Img_' + Date.now() + '.' + type;
+        const path = 'customers/';
+        const base64Data = Buffer.from(avatar.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        if (env.imageserver === 's3') {
+            await this.s3Service.imageUpload((path + name), base64Data, type);
+        } else {
+            await this.imageService.imageUpload((path + name), base64Data);
+        }
         customer.avatar = name;
         customer.avatarPath = path;
       }

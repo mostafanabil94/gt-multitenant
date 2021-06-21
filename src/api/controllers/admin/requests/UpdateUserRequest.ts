@@ -37,6 +37,8 @@ export class UpdateUserRequest {
     })
     public email: string;
 
+    public avatar: string;
+
     @IsNotEmpty({
         message: 'User Group Id is required',
     })

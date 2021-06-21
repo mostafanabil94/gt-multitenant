@@ -291,6 +291,20 @@ export class UserController {
     console.log(createParam.password);
     const newUserPassword = await User.hashPassword(createParam.password);
     const newUserParams = new User();
+    const avatar = createParam.avatar;
+    if (avatar) {
+      const type = avatar.split(';')[0].split('/')[1];
+      const name = 'Img_' + Date.now() + '.' + type;
+      const path = 'users/';
+      const base64Data = Buffer.from(avatar.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      if (env.imageserver === 's3') {
+          await this.s3Service.imageUpload((path + name), base64Data, type);
+      } else {
+          await this.imageService.imageUpload((path + name), base64Data);
+      }
+      newUserParams.avatar = name;
+      newUserParams.avatarPath = path;
+    }
     newUserParams.username = createParam.username;
     newUserParams.password = newUserPassword;
     newUserParams.firstName = createParam.firstName;
@@ -400,6 +414,20 @@ export class UserController {
     console.log(createParam.password);
     const newUserPassword = await User.hashPassword(createParam.password);
     const newUserParams = new User();
+    const avatar = createParam.avatar;
+    if (avatar) {
+      const type = avatar.split(';')[0].split('/')[1];
+      const name = 'Img_' + Date.now() + '.' + type;
+      const path = 'users/';
+      const base64Data = Buffer.from(avatar.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      if (env.imageserver === 's3') {
+          await this.s3Service.imageUpload((path + name), base64Data, type);
+      } else {
+          await this.imageService.imageUpload((path + name), base64Data);
+      }
+      newUserParams.avatar = name;
+      newUserParams.avatarPath = path;
+    }
     newUserParams.username = createParam.username;
     if (createParam.password) {
       newUserParams.password = newUserPassword;
