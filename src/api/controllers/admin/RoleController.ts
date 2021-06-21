@@ -12,7 +12,6 @@ import {
   Delete,
   Req,
 } from "routing-controllers";
-import { DeleteRoleRequest as DeleteRoleRequest } from "./requests/DeleteRoleRequest";
 import { CreateRole as CreateRoleRequest } from "./requests/CreateRoleRequest";
 import { UserGroupService } from "../../services/UserGroupService";
 import { UserService } from "../../services/UserService";
@@ -257,7 +256,7 @@ export class RoleController {
   @Delete("/delete-role/:id")
   @Authorized()
   public async deleteRole(
-    @Body({ validate: true }) role: DeleteRoleRequest,
+    @Param("id") id: number,
     @Res() response: any,
     @Req() request: any
   ): Promise<any> {
@@ -270,7 +269,7 @@ export class RoleController {
     }
     const roleId = await this.userGroupService.findOne({
       where: {
-        groupId: role.groupId,
+        groupId: id,
       },
     });
     if (!roleId) {
@@ -283,8 +282,8 @@ export class RoleController {
 
     const defaultRoleId = await this.userGroupService.findOne({
       where: {
-        groupId: role.groupId,
-        name: "Admin",
+        groupId: id,
+        name: "Super Admin",
       },
     });
 
@@ -298,7 +297,7 @@ export class RoleController {
 
     const finduser = await this.userService.findOne({
       where: {
-        userGroupId: role.groupId,
+        userGroupId: id,
       },
     });
 
@@ -311,7 +310,7 @@ export class RoleController {
       return response.status(400).send(errorResponse);
     }
 
-    const deleteRole = await this.userGroupService.delete(role.groupId);
+    const deleteRole = await this.userGroupService.delete(id);
     console.log("role" + deleteRole);
     if (deleteRole) {
       const successResponse: any = {
