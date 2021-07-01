@@ -1,10 +1,4 @@
-/*
- * spurtcommerce API
- * version 2.2
- * Copyright (c) 2020 piccosoft ltd
- * Author piccosoft ltd <support@piccosoft.com>
- * Licensed under the MIT license.
- */import {Service} from 'typedi';
+import {Service} from 'typedi';
 import {OrmRepository} from 'typeorm-typedi-extensions';
 import {Logger, LoggerInterface} from '../../decorators/Logger';
 import {Settings} from '../models/Setting';

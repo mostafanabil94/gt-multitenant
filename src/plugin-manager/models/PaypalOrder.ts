@@ -1,12 +1,4 @@
-/*
- * spurtcommerce API
- * version 2.1
- * http://api.spurtcommerce.com
- *
- * Copyright (c) 2020 piccosoft ltd
- * Author piccosoft ltd <support@piccosoft.com>
- * Licensed under the MIT license.
- */import {BeforeInsert, BeforeUpdate, Column, Entity} from 'typeorm';
+import {BeforeInsert, BeforeUpdate, Column, Entity} from 'typeorm';
 import {PrimaryGeneratedColumn} from 'typeorm/index';
 import {BaseModel} from '../../api/models/BaseModel';
 import moment = require('moment');

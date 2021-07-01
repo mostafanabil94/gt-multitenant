@@ -24,9 +24,9 @@ export class ClientMembershipPlanController {
    * @api {post} /api/client-membership-plan/create-client-membership-plan Create Client Membership Plan API
    * @apiGroup Client Membership Plan
    * @apiHeader {String} Authorization
-   * @apiParam (Request body) {String} customerId customerId
-   * @apiParam (Request body) {String} membershipPlanId membershipPlanId
-   * @apiParam (Request body) {String} salesId salesId
+   * @apiParam (Request body) {Number} customerId customerId
+   * @apiParam (Request body) {Number} membershipPlanId membershipPlanId
+   * @apiParam (Request body) {Number} salesId salesId
    * @apiParamExample {json} Input
    * {
    *      "customerId" : "",
@@ -50,10 +50,10 @@ export class ClientMembershipPlanController {
     @Req() request: any,
     @Res() response: any
   ): Promise<any> {
-    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2) {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
       const errorResponse: any = {
         status: 0,
-        message: "Only Super Admin and Admin has permission for this action",
+        message: "Only Super Admin, Admin and Sales has permission for this action",
       };
       return response.status(400).send(errorResponse);
     }
@@ -64,18 +64,18 @@ export class ClientMembershipPlanController {
     // Calculation of startdate, enddate and price upon membershipplan
     newClientMembershipPlan.createdByType = 1;
     newClientMembershipPlan.createdBy = request.user.userId;
-    const branchSave = await this.clientMembershipPlanService.create(newClientMembershipPlan);
-    if (branchSave !== undefined) {
+    const clientMembershipPlanSave = await this.clientMembershipPlanService.create(newClientMembershipPlan);
+    if (clientMembershipPlanSave !== undefined) {
       const successResponse: any = {
         status: 1,
-        message: "Successfully created new ClientMembershipPlan",
-        data: branchSave,
+        message: "Successfully created new Client Membership Plan",
+        data: clientMembershipPlanSave,
       };
       return response.status(200).send(successResponse);
     } else {
       const errorResponse: any = {
         status: 0,
-        message: "unable to create ClientMembershipPlan",
+        message: "unable to create Client Membership Plan",
       };
       return response.status(400).send(errorResponse);
     }

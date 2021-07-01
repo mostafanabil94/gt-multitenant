@@ -17,6 +17,7 @@ import { CustomerDocument } from "./CustomerDocument";
 import { CustomerGroup } from "./CustomerGroup";
 import { BranchCustomer } from "./BranchCustomer";
 import { ClientMembershipPlan } from "./ClientMembershipPlan";
+import { CustomerPaymentToken } from "./CustomerPaymentToken";
 
 @Entity("customer")
 export class Customer extends BaseModel {
@@ -144,6 +145,9 @@ export class Customer extends BaseModel {
     (branchCustomer) => branchCustomer.customer
   )
   public branchCustomer: BranchCustomer[];
+
+  @OneToMany((type) => CustomerPaymentToken, (customerPaymentToken) => customerPaymentToken.customer)
+  public customerPaymentToken: CustomerPaymentToken[];
 
   @BeforeInsert()
   public async createDetails(): Promise<void> {

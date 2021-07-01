@@ -9,6 +9,9 @@ export class CreateBranchRequest {
   public brandId: number;
 
   @IsNotEmpty()
+  public countryId: number;
+
+  @IsNotEmpty()
   public email: string;
 
   public logo: string;

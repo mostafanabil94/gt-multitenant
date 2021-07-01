@@ -85,7 +85,8 @@ export class BranchController {
     newBranch.name = createParam.name;
     newBranch.email = createParam.email;
     newBranch.legalName = createParam.legalName;
-    newBranch.phone = createParam.email;
+    newBranch.phone = createParam.phone;
+    newBranch.countryId = createParam.countryId;
     newBranch.isActive = createParam.status;
     newBranch.createdByType = 1;
     newBranch.createdBy = request.user.userId;
@@ -179,7 +180,8 @@ export class BranchController {
     branch.name = updateParam.name;
     branch.email = updateParam.email;
     branch.legalName = updateParam.legalName;
-    branch.phone = updateParam.email;
+    branch.phone = updateParam.phone;
+    branch.countryId = updateParam.countryId;
     branch.isActive = updateParam.status;
     branch.modifiedByType = 1;
     branch.modifiedBy = request.user.userId;

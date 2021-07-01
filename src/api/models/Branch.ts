@@ -17,6 +17,9 @@ import { BranchMembership } from "./BranchMembership";
 import { BranchTax } from "./BranchTax";
 import { BranchCurrency } from "./BranchCurrency";
 import { BranchCustomer } from "./BranchCustomer";
+import { Country } from "./Country";
+import { BranchPaymentGateway } from "./BranchPaymentGateway";
+import { CustomerPaymentToken } from "./CustomerPaymentToken";
 
 @Entity("branch")
 export class Branch extends BaseModel {
@@ -25,6 +28,9 @@ export class Branch extends BaseModel {
 
   @Column({ name: "brand_id" })
   public brandId: number;
+
+  @Column({ name: "country_id" })
+  public countryId: number;
 
   @Column({ name: "name" })
   public name: string;
@@ -63,6 +69,10 @@ export class Branch extends BaseModel {
   @JoinColumn({ name: "brand_id" })
   public brand: Brand;
 
+  @ManyToOne((type) => Country, (country) => country.branch)
+  @JoinColumn({ name: "branch_id" })
+  public country: Country;
+
   @OneToMany((type) => BranchUser, (branchUser) => branchUser.branch)
   public branchUser: BranchUser[];
 
@@ -77,6 +87,12 @@ export class Branch extends BaseModel {
 
   @OneToMany((type) => BranchCustomer, (branchCustomer) => branchCustomer.branch)
   public branchCustomer: BranchCustomer[];
+
+  @OneToMany((type) => BranchPaymentGateway, (branchPaymentGateway) => branchPaymentGateway.branch)
+  public branchPaymentGateway: BranchPaymentGateway[];
+
+  @OneToMany((type) => CustomerPaymentToken, (customerPaymentToken) => customerPaymentToken.branch)
+  public customerPaymentToken: CustomerPaymentToken[];
 
   @OneToMany((type) => Room, (room) => room.branch)
   public room: Room[];

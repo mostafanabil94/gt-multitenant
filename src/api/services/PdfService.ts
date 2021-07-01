@@ -1,12 +1,4 @@
-/*
- * SpurtCommerce API
- * version 2.0.0
- * http://api.spurtcommerce.com
- *
- * Copyright (c) 2020 PICCOSOFT
- * Author piccosoft <support@spurtcommerce.com>
- * Licensed under the MIT license.
- */import { Service } from 'typedi';
+import { Service } from 'typedi';
 import * as path from 'path';
 import ejs = require('ejs');
 import moment from 'moment';

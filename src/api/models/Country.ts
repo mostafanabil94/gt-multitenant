@@ -1,6 +1,8 @@
 import { Column, PrimaryGeneratedColumn, Entity, OneToMany } from "typeorm";
+import { Branch } from "./Branch";
 import { City } from "./City";
 import { Customer } from "./Customer";
+import { PaymentGateway } from "./PaymentGateway";
 
 @Entity("country")
 export class Country {
@@ -33,4 +35,10 @@ export class Country {
 
   @OneToMany((type) => Customer, (customer) => customer.country)
   public customer: Customer[];
+
+  @OneToMany((type) => Branch, (branch) => branch.country)
+  public branch: Branch[];
+
+  @OneToMany((type) => PaymentGateway, (paymentGateway) => paymentGateway.country)
+  public paymentGateway: PaymentGateway[];
 }

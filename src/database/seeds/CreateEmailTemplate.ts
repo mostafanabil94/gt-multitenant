@@ -4,11 +4,11 @@ import { EmailTemplate } from '../../api/models/EmailTemplate';
 export class CreateEmailTemplate implements Seed {
     public async seed(factory: Factory, connection: Connection): Promise<any> {
         const em = connection.createEntityManager();
-        const registerData = "Dear {name},<br/><br/> <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> Thank you for expressing your interest and registering with Spurtcommerce, the faster roadway for a smarter eCommerce drive.   </p>";
+        const registerData = "Dear {name},<br/><br/> <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> Thank you for expressing your interest and registering with Gymtour, the faster roadway for a smarter eCommerce drive.   </p>";
         const fogotPasswordData = "Dear {name},<br/><br/>        <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> Your new Password is :  {xxxxxx}  </p>";
         const contactUsData = "Dear Admin,<br/><br/>        <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> You just received an enquiry from {name} and the details are here: <br> Details: <br> Email: {email}, <br> Phone Number : {phoneNumber}, <br> Message : {message}.  </p>";
         const createCustomerData = 'Dear {name},<br/><br/>   ' +
-            ' We are glad to inform you that Spurtcommerce  has added you as Customer.Here are your User Credentials for logging into the Application <br>' +
+            ' We are glad to inform you that Gymtour  has added you as Customer.Here are your User Credentials for logging into the Application <br>' +
             "     <p style='margin-bottom:.5em; margin: 0 0 10px 0;'>  User ID : {username}</p>     " +
             "   <p style='margin-bottom:.5em; margin: 0 0 10px 0;'>  Password : {password}</p> <br/>        " +
             "<p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> You may login using the above Email Id and Password. </p>";
@@ -16,11 +16,11 @@ export class CreateEmailTemplate implements Seed {
             " <tr>        <td dir='ltr' style='padding:0 0px;color:#000;font-weight:300;text-align:left;font-size:12px;line-height:1.2rem;padding-top:10px;font-family: 'Roboto', sans-serif;' valign='top'> You have successfully placed an order for customization services. Kindly find the following details on the placed order.    </tr></tbody></table></td></tr> ";
         const adminNotifyData = "Dear Mr.Admin,        </td>    </tr>    <tr>        <td dir='ltr' style='padding:0 0px;color:#078e05;font-weight:400;text-align:left;font-size:16px;line-height:1.5rem;padding-top:10px;font-family: 'Roboto', sans-serif;' valign='top'> A new order has been placed.         </td>    </tr>    <tr>    " +
             "    <td dir='ltr' style='padding:0 0px;color:#000;font-weight:300;text-align:left;font-size:12px;line-height:1.2rem;padding-top:10px;font-family: 'Roboto', sans-serif;' valign='top'> The new order {orderId} from the Customer {name} has been successfully placed. Kindly find the following details on the placed order.    </tr> </tbody></table></td> </tr> ";
-        const userData = ' <p>Dear {name}, <br />&nbsp;</p>' + '<p>We are glad to inform you that Spurtcommerce has added you as admin User.Here are your User Credentials for logging into the Application</p>' + '<p>User ID : {username}</p>' + '<p>Password : {password}</p>'
+        const userData = ' <p>Dear {name}, <br />&nbsp;</p>' + '<p>We are glad to inform you that Gymtour has added you as admin User.Here are your User Credentials for logging into the Application</p>' + '<p>User ID : {username}</p>' + '<p>Password : {password}</p>'
          + '<p>&nbsp;</p>' + '<p>You may login using the above Email Id and Password.</p>' + '<p>&nbsp;</p>';
         const enquiryData = '<p>Dear Admin,<br />&nbsp;</p>' + '<p>Some one gave service enquiry for <u>{title}</u>,</p>' + '<p><i>Comments</i> : {comments}</p>' + '<b><i>User Details:</i></b><br>' + 'Name: {name},<br> ' +
          'Email: {email},<br>' + 'mobile: {mobile}<br>' + '<p>&nbsp;</p>' + '<p>&nbsp;</p>';
-        const oauthData = "Dear {name},<br/><br/>        <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> Thankyou for showing your interest in SpurtCommerce, your temporary password for next time login is :  {xxxxxx} or you can login through Oauth. </p>";
+        const oauthData = "Dear {name},<br/><br/>        <p style='margin-bottom:.5em; margin: 0 0 10px 0;text-indent: 50px'> Thankyou for showing your interest in Gymtour, your temporary password for next time login is :  {xxxxxx} or you can login through Oauth. </p>";
           const statusData: any = [            {
                 emailTemplateId: 1,
                 title: 'Register Content',

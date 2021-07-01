@@ -25,12 +25,19 @@ import { DeleteCustomerRequest } from "./requests/DeleteCustomerRequest";
 import * as fs from "fs";
 import { S3Service } from "../../services/S3Service";
 import { ImageService } from "../../services/ImageService";
+import { CreateCustomerToken } from "./requests/CreateCustomerTokenRequest";
+import { GTPaymentGatewayService } from "../../services/GTPaymentGatewayService";
+// import { CustomerPaymentToken } from "../../models/CustomerPaymentToken";
+// import { CustomerPaymentTokenService } from "../../services/CustomerPaymentToken";
 
 @JsonController("/user-customer")
 export class CustomerController {
   constructor(private customerService: CustomerService,
               private s3Service: S3Service,
-              private imageService: ImageService) {}
+              private imageService: ImageService,
+              private gtPaymentGatewayService: GTPaymentGatewayService
+              // private customerPaymentTokenService: CustomerPaymentTokenService
+               ) {}
 
   // Create Customer API
   /**
@@ -997,4 +1004,85 @@ export class CustomerController {
     };
     return response.status(200).send(successResponse);
   }
+
+  // Create Customer Token API
+  /**
+   * @api {post} /api/user-customer/create-customer-token Add Customer Token API
+   * @apiGroup User Customer
+   * @apiHeader {String} Authorization
+   * @apiParam (Request body) {Number} branchId branchId
+   * @apiParam (Request body) {Number} customerId customerId
+   * @apiParam (Request body) {String} cardNumber cardNumber
+   * @apiParam (Request body) {String} expiryMonth expiryMonth
+   * @apiParam (Request body) {String} expiryYear expiryYear
+   * @apiParam (Request body) {String} cvv cvv
+   * @apiParamExample {json} Input
+   * {
+   *      "branchId" : "",
+   *      "customerId" : "",
+   *      "cardNumber" : "",
+   *      "expiryMonth" : "",
+   *      "expiryYear" : "",
+   *      "cvv" : "",
+   * }
+   * @apiSuccessExample {json} Success
+   * HTTP/1.1 200 OK
+   * {
+   *      "message": "Customer Token Created successfully",
+   *      "status": "1"
+   * }
+   * @apiSampleRequest /api/user-customer/create-customer-token
+   * @apiErrorExample {json} Customer Token error
+   * HTTP/1.1 500 Internal Server Error
+   */
+   @Post("/create-customer-token")
+   @Authorized()
+   public async createCustomerToken(
+     @Body({ validate: true }) customerTokenParam: CreateCustomerToken,
+     @Req() request: any,
+     @Res() response: any
+   ): Promise<any> {
+    if (request.user.userGroupId !== 1 && request.user.userGroupId !== 2 && request.user.userGroupId !== 3) {
+      const errorResponse: any = {
+        status: 0,
+        message: "Only Super Admin, Admin and Sales has permission for this action",
+      };
+      return response.status(400).send(errorResponse);
+    }
+
+    // const customerId = customerTokenParam.customerId;
+    const branchId = customerTokenParam.branchId;
+    const cardNumber = customerTokenParam.cardNumber;
+    const expiryMonth = customerTokenParam.expiryMonth;
+    const expiryYear = customerTokenParam.expiryYear;
+    const cvv = customerTokenParam.cvv;
+    const paymentProcessor = await this.gtPaymentGatewayService.getPaymentProcessor(branchId);
+    console.log(paymentProcessor);
+    const tokenCreation = await this.gtPaymentGatewayService.createToken(cardNumber, expiryMonth, expiryYear, cvv);
+    console.log(tokenCreation);
+
+    // const customerPaymentToken = new CustomerPaymentToken();
+    // customerPaymentToken.branchId = branchId;
+    // customerPaymentToken.customerId = customerId;
+    // customerPaymentToken.paymentGatewayId = paymentProcessor.paymentGatewayId;
+    // customerPaymentToken.token = tokenCreation.id;
+    // customerPaymentToken.isActive = 1;
+
+    // const customerTokenSave = await this.customerPaymentTokenService.create(customerPaymentToken);
+
+    // if (customerTokenSave) {
+    //   const successResponse: any = {
+    //     status: 1,
+    //     message: "Customer Payment Token saved successfully",
+    //     data: customerTokenSave,
+    //   };
+    //   return response.status(200).send(successResponse);
+    // } else {
+    //   const errorResponse: any = {
+    //     status: 0,
+    //     message: "unable to save Customer Payment Token",
+    //   };
+    //   return response.status(400).send(errorResponse);
+    // }
+   }
 }
